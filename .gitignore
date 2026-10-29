@@ -1,31 +1,31 @@
-/vendor/
-node_modules/
-npm-debug.log
-yarn-error.log
+# === LARAVEL (BACKEND) SPECIFIC ===
+/backend/.env
+/backend/.env.backup
+/backend/.env.production
+/backend/vendor/
+/backend/node_modules/
+/backend/public/storage
+/backend/storage/*.key
+/backend/bootstrap/cache/*
+!/backend/bootstrap/cache/.gitignore
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
+# === FLUTTER (MOBILE) SPECIFIC ===
+/mobile/.dart_tool/
+/mobile/.flutter-plugins
+/mobile/.flutter-plugins-dependencies
+/mobile/.packages
+/mobile/build/
+/mobile/ios/Flutter/.flutter-plugins
+/mobile/ios/Flutter/.flutter-plugins-dependencies
+/mobile/android/.gradle/
+/mobile/android/local.properties
 
-# Laravel 5 & Lumen specific
-public/storage
-public/hot
-
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
-
-storage/*.key
-.env
-Homestead.yaml
-Homestead.json
-/.vagrant
-.phpunit.result.cache
-/.phpunit.cache
-
-/public/build
-/storage/pail
-.env.backup
-.env.production
-.phpactor.json
-auth.json
+# === GENERAL/IDE ===
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
