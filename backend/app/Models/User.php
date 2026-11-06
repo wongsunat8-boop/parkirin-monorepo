@@ -2,48 +2,83 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    protected $table = 'user';
+    protected $primaryKey = 'id_user';
+    public $timestamps = false;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
-        'email',
+        'id_tempat_parkir',
+        'nama_lengkap',
+        'username',
         'password',
+        'role',
+        'status_aktif',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'    => 'hashed',
+            'status_aktif' => 'integer',
         ];
+    }
+
+    // ── Relations ──
+
+    public function tempatParkir(): BelongsTo
+    {
+        return $this->belongsTo(TempatParkir::class, 'id_tempat_parkir', 'id_tempat_parkir');
+    }
+
+    public function logAktivitas(): HasMany
+    {
+        return $this->hasMany(LogAktivitas::class, 'id_user', 'id_user');
+    }
+
+    public function pengajuanBanned(): HasMany
+    {
+        return $this->hasMany(PengajuanBanned::class, 'id_pengaju', 'id_user');
+    }
+
+    public function kendaraanInput(): HasMany
+    {
+        return $this->hasMany(Kendaraan::class, 'id_user_input', 'id_user');
+    }
+
+    public function transaksiDilayani(): HasMany
+    {
+        return $this->hasMany(Transaksi::class, 'id_petugas', 'id_user');
+    }
+
+    // ── Helpers ──
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isPetugas(): bool
+    {
+        return $this->role === 'petugas';
     }
 }
