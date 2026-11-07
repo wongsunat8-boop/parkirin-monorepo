@@ -4,9 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ */
 class Pengendara extends Authenticatable
 {
+    use HasApiTokens;
     protected $table = 'pengendara';
     protected $primaryKey = 'id_pengendara';
     public $timestamps = false;

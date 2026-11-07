@@ -7,6 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::unprepared("
             DROP FUNCTION IF EXISTS fn_hitung_biaya_parkir;
         ");
@@ -63,7 +67,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::unprepared("DROP FUNCTION IF EXISTS fn_hitung_biaya_parkir;");
+        if (DB::getDriverName() === 'mysql') {
+            DB::unprepared("DROP FUNCTION IF EXISTS fn_hitung_biaya_parkir;");
+        }
     }
 };
 
