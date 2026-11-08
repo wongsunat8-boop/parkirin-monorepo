@@ -39,11 +39,30 @@ class AuthController extends Controller
         }
 
         /** @var User|null $user */
-        $user = Auth::guard('web')->user();
+        $user = Auth::guard('web')->user()?->loadMissing('tempatParkir:id_tempat_parkir,status_aktif');
 
-        if (!$user instanceof User || !$user->status_aktif) {
+        if (!$user instanceof User) {
             Auth::guard('web')->logout();
-            return back()->withErrors(['username' => 'Akun Anda telah dinonaktifkan.'])->withInput();
+            return back()->withErrors(['username' => 'Username atau password salah.'])->withInput();
+        }
+
+        // Pengecekan 1: status tenant (untuk user terikat tenant). Berlaku terlepas dari status akun.
+        if ($user->id_tempat_parkir && !$user->isSuperAdmin()) {
+            $tenantAktif = (int) ($user->tempatParkir->status_aktif ?? 0) === 1;
+            if (!$tenantAktif) {
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors(['username' => 'Tenant telah dinonaktifkan. Anda tidak dapat masuk.'])->withInput();
+            }
+        }
+
+        // Pengecekan 2: status akun user.
+        if (!(int) $user->status_aktif) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return back()->withErrors(['username' => 'User telah dinonaktifkan. Akun Anda tidak dapat digunakan untuk masuk.'])->withInput();
         }
 
         $request->session()->regenerate();

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
@@ -35,8 +36,14 @@ class RoleMiddleware
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 
-        if (!$user->status_aktif) {
-            abort(403, 'Akun Anda telah dinonaktifkan.');
+        if (!(int) $user->status_aktif) {
+            if (Auth::guard('web')->check() && !$request->expectsJson()) {
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route('login')->withErrors(['username' => 'User telah dinonaktifkan. Akun Anda tidak dapat mengakses sistem.']);
+            }
+            abort(403, 'User telah dinonaktifkan. Akun Anda tidak dapat mengakses sistem.');
         }
 
         return $next($request);

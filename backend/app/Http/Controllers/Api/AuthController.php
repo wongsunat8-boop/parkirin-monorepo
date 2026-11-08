@@ -63,7 +63,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = User::where('username', $username)->first();
+        $user = User::with('tempatParkir:id_tempat_parkir,status_aktif')->where('username', $username)->first();
 
         if (!$user || !Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
@@ -71,9 +71,20 @@ class AuthController extends Controller
             ]);
         }
 
-        if (!$user->status_aktif) {
+        // Pengecekan 1: status tenant (terlepas dari status akun) untuk user terikat tenant.
+        if ($user->id_tempat_parkir && $user->role !== 'super_admin') {
+            $tenantAktif = (int) ($user->tempatParkir->status_aktif ?? 0) === 1;
+            if (!$tenantAktif) {
+                throw ValidationException::withMessages([
+                    'username' => ['Tenant telah dinonaktifkan. Anda tidak dapat masuk.'],
+                ]);
+            }
+        }
+
+        // Pengecekan 2: status akun user.
+        if (!(int) $user->status_aktif) {
             throw ValidationException::withMessages([
-                'username' => ['Akun Anda telah dinonaktifkan.'],
+                'username' => ['User telah dinonaktifkan. Akun Anda tidak dapat digunakan untuk masuk.'],
             ]);
         }
 

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class TenantIsolationMiddleware
@@ -29,6 +30,22 @@ class TenantIsolationMiddleware
         // Tenant-bound users must have an id_tempat_parkir
         if (!$user->id_tempat_parkir) {
             abort(403, 'Akun tidak terkait dengan tempat parkir manapun.');
+        }
+
+        // Blokir sesi aktif jika tenant dinonaktifkan (mencegah perubahan data pada tenant nonaktif).
+        $user->loadMissing('tempatParkir:id_tempat_parkir,status_aktif');
+        $tenantAktif = (int) ($user->tempatParkir->status_aktif ?? 0) === 1;
+        if (!$tenantAktif) {
+            if (Auth::guard('web')->check()) {
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                if ($request->expectsJson()) {
+                    abort(403, 'Tenant telah dinonaktifkan. Anda tidak dapat mengakses sistem.');
+                }
+                return redirect()->route('login')->withErrors(['username' => 'Tenant telah dinonaktifkan. Anda tidak dapat mengakses sistem.']);
+            }
+            abort(403, 'Tenant telah dinonaktifkan. Anda tidak dapat mengakses sistem.');
         }
 
         // Check if the route or request input has an id_tempat_parkir parameter
