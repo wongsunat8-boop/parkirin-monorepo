@@ -17,11 +17,23 @@
                         <td class="font-semibold">{{ $p->frekuensi_parkir }}x</td>
                         <td>{{ $p->skor_reputasi }}</td>
                         <td>
-                            <details class="inline"><summary class="cursor-pointer text-danger hover:underline list-none">Ajukan Banned</summary>
-                                <form method="POST" action="{{ route('admin.pengendara.pengajuan-banned',$p) }}" class="mt-2 flex gap-2 items-center">@csrf
-                                    <input name="alasan" required maxlength="100" class="ui-input" placeholder="Alasan">
-                                    <button class="bg-danger text-white text-xs px-3 py-1.5 rounded-lg">Kirim</button>
-                                </form>
+                            <details class="group relative inline-block text-left">
+                                <summary class="btn-action-danger cursor-pointer list-none select-none">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    <span>Ajukan Banned</span>
+                                </summary>
+                                <div class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 p-3 z-20">
+                                    <div class="text-xs font-bold text-slate-800 mb-2">Alasan Pengajuan Banned</div>
+                                    <form method="POST" action="{{ route('admin.pengendara.pengajuan-banned',$p) }}" class="space-y-2">
+                                        @csrf
+                                        <input name="alasan" required maxlength="100" class="ui-input text-xs" placeholder="Contoh: Pelanggaran tata tertib / skor rendah">
+                                        <div class="flex justify-end gap-1.5">
+                                            <button type="submit" class="btn-action-danger">
+                                                <span>Kirim ke Owner</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </details>
                         </td>
                     </tr>

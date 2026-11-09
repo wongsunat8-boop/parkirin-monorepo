@@ -1,0 +1,21 @@
+# Laravel & Web Heavy Directories
+backend/vendor/
+backend/node_modules/
+backend/storage/
+backend/bootstrap/cache/
+backend/public/build/
+backend/package-lock.json
+backend/composer.lock   
+
+# Flutter & Mobile Heavy Directories
+mobile/build/
+mobile/.dart_tool/
+mobile/.idea/
+mobile/android/.gradle/
+mobile/ios/Pods/
+mobile/pubspec.lock
+
+# System & Git
+.git/
+*.log
+*.sql

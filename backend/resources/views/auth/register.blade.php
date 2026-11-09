@@ -40,11 +40,8 @@
                 <span class="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-md">Pendaftaran Pengendara</span>
             </div>
 
-            <a href="{{ route('landing') }}" class="flex items-center gap-2.5 mb-6">
-                <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4"/></svg>
-                </div>
-                <span class="font-heading font-black text-2xl text-dark tracking-tight">Park<span class="text-primary">irin</span></span>
+            <a href="{{ route('landing') }}" class="inline-flex items-center mb-6 group" aria-label="Beranda Parkirin">
+                <img src="{{ asset('assets/logo/primary/Teks.svg') }}" alt="Parkirin" class="h-9 w-auto object-contain">
             </a>
 
             <h1 class="font-heading text-2xl sm:text-3xl font-bold text-dark">Buat Akun Pengendara</h1>

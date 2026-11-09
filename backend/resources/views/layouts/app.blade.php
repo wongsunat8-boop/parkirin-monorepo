@@ -6,10 +6,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Parkirin — Smart Parking SaaS')</title>
 
+    {{-- Official Favicon SVG (Icon only) --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/logo/primary/Icon.svg') }}">
+
     {{-- Google Fonts: Nunito (Heading) & Inter (Sans/Body) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    {{-- Alpine.js for lightweight UI state reactivity --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
     {{-- Tailwind CSS Config (Parkirin Palette & Typography) --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -110,6 +116,9 @@
             align-items: center;
         }
     </style>
+
+    {{-- Chart.js for data visualization across dashboards --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
     @stack('styles')
 </head>

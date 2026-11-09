@@ -5,7 +5,11 @@
     $authUser = auth('web')->user();
     $role = $authUser?->role;
     $roleLabel = match($role) {
-        'super_admin' => 'Super Admin', 'owner' => 'Owner', 'admin' => 'Admin', 'petugas' => 'Petugas', default => 'Staff',
+        'super_admin' => 'Super Admin',
+        'owner' => 'Owner',
+        'admin' => 'Admin',
+        'petugas' => 'Petugas',
+        default => 'Staff',
     };
     $homeRoute = match($role) {
         'super_admin' => route('super-admin.dashboard'),
@@ -61,164 +65,534 @@
         return '<svg class="'.$class.'" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">'.$p.'</svg>';
     };
 @endphp
+
 <style>
-  :root { --sidebar-w: 248px; --sidebar-collapsed: 72px; }
-  .shell { min-height: 100vh; background: #f6f7f9; }
-  .app-sidebar { position:fixed; inset:0 auto 0 0; width:var(--sidebar-w); background:#fff; border-right:1px solid #e7e9ee; z-index:40; display:flex; flex-direction:column; transition: width .2s ease, transform .2s ease; }
-  .shell.is-collapsed .app-sidebar { width: var(--sidebar-collapsed); }
-  .app-main { padding-left:0; min-height:100vh; display:flex; flex-direction:column; }
-  @media (min-width:1024px){ .app-main { padding-left: var(--sidebar-w); transition: padding-left .2s ease; } .shell.is-collapsed .app-main { padding-left: var(--sidebar-collapsed); } }
-  .app-topbar { position:sticky; top:0; z-index:30; height:56px; background:rgba(255,255,255,.9); backdrop-filter: blur(8px); border-bottom:1px solid #e7e9ee; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 16px; }
-  @media (min-width:1024px){ .app-topbar { padding:0 24px; } }
-  .nav-link { display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:10px; color:#374151; font:500 13.5px/1.2 Inter,sans-serif; text-decoration:none; white-space:nowrap; }
-  .nav-link:hover { background:#f3f4f6; color:#111827; }
-  .nav-link.active { background:#0D63A5; color:#fff; box-shadow: 0 1px 2px rgba(13,99,165,.25); }
-  .nav-link .nav-text { overflow:hidden; text-overflow:ellipsis; }
-  .shell.is-collapsed .nav-link { justify-content:center; padding:10px; }
-  .shell.is-collapsed .nav-text, .shell.is-collapsed .nav-section, .shell.is-collapsed .brand-text, .shell.is-collapsed .user-meta { display:none; }
-  .bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:40; background:rgba(255,255,255,.97); backdrop-filter: blur(8px); border-top:1px solid #e7e9ee; display:flex; align-items:stretch; overflow-x:auto; -webkit-overflow-scrolling:touch; padding:6px 2px calc(6px + env(safe-area-inset-bottom)); scrollbar-width:none; }
-  .bottom-nav::-webkit-scrollbar { display:none; }
-  @media (min-width:1024px){ .bottom-nav { display:none; } }
-  .bnav-item { flex:1 0 64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:4px 2px; color:#6b7280; text-decoration:none; font:500 10.5px/1.1 Inter,sans-serif; min-width:64px; border-radius:10px; }
-  .bnav-item.active { color:#0D63A5; background:#eff6ff; }
-  .bnav-item span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; text-align:center; }
-  .content-wrap { flex:1; width:100%; max-width: 1440px; margin:0 auto; padding: 16px 16px 88px; }
-  @media (min-width:640px){ .content-wrap { padding: 20px 20px 88px; } }
-  @media (min-width:1024px){ .content-wrap { padding: 24px 28px 32px; } }
-  /* shadcn-like primitives */
-  .ui-card { background:#fff; border:1px solid #e7e9ee; border-radius:14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-  .ui-card-h { padding:14px 16px; border-bottom:1px solid #eef0f4; }
-  .ui-card-t { font:700 14.5px/1.2 Inter,sans-serif; color:#111827; }
-  .ui-card-d { font:400 12.5px/1.4 Inter,sans-serif; color:#6b7280; margin-top:2px; }
-  .ui-card-b { padding:16px; }
-  .ui-kpi { font:800 26px/1 Nunito,Inter,sans-serif; letter-spacing:-.02em; color:#111827; }
-  .ui-kpi-label { font:600 11.5px/1.2 Inter,sans-serif; text-transform:uppercase; letter-spacing:.04em; color:#6b7280; }
-  .ui-kpi-sub { font:400 12px/1.3 Inter,sans-serif; color:#6b7280; margin-top:4px; }
-  .ui-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:10px; padding:8px 14px; font:600 13px/1.2 Inter,sans-serif; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:.15s; }
+  :root {
+    --sidebar-w: 240px;
+    --sidebar-collapsed: 72px;
+  }
+  .shell {
+    min-height: 100vh;
+    background-color: #F9F9F9;
+  }
+
+  /* ═══════════════════════════════════════════
+     RESPONSIVE NAVIGATION BREAKPOINT (< 768px vs >= 768px)
+     Aturan Ketat: Jika Bottom Nav muncul, Sidebar WAJIB hilang total (display: none !important).
+     Jika Sidebar muncul, Bottom Nav WAJIB hilang total (display: none !important).
+  ═══════════════════════════════════════════ */
+  /* Bottom Navigation Bar styling (Horizontal scrollable for Admin with preserved item sizes) */
+  .bottom-nav {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .bottom-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  @media (max-width: 767.98px) {
+    .app-sidebar {
+      display: none !important;
+    }
+    .bottom-nav {
+      display: flex !important;
+    }
+    .app-main {
+      padding-left: 0 !important;
+      padding-bottom: 76px !important;
+      transition: none;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .app-sidebar {
+      display: flex !important;
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-w);
+      background: #FFFFFF;
+      border-right: 1px solid rgba(226, 232, 240, 0.8);
+      z-index: 40;
+      flex-direction: column;
+      transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .shell.is-collapsed .app-sidebar {
+      width: var(--sidebar-collapsed);
+    }
+    .bottom-nav {
+      display: none !important;
+    }
+    .app-main {
+      padding-left: var(--sidebar-w);
+      padding-bottom: 0 !important;
+      transition: padding-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .shell.is-collapsed .app-main {
+      padding-left: var(--sidebar-collapsed);
+    }
+  }
+
+  .app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 16px;
+  }
+  @media (min-width: 768px) {
+    .app-topbar {
+      padding: 0 24px;
+    }
+  }
+
+  /* Nav Links */
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    color: #475569;
+    font: 500 13.5px/1.2 'Inter', sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .nav-link:hover {
+    background: #F1F5F9;
+    color: #0F172A;
+  }
+  .nav-link.active {
+    background: #0D63A5;
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(13, 99, 165, 0.25);
+  }
+  .shell.is-collapsed .nav-link {
+    justify-content: center;
+    padding: 11px;
+  }
+  .shell.is-collapsed .nav-text,
+  .shell.is-collapsed .nav-section-title,
+  .shell.is-collapsed .user-meta-block {
+    display: none !important;
+  }
+
+  /* Content wrap */
+  .content-wrap {
+    flex: 1;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 16px 16px 88px;
+  }
+  @media (min-width: 640px) {
+    .content-wrap {
+      padding: 20px 20px 88px;
+    }
+  }
+  @media (min-width: 768px) {
+    .content-wrap {
+      padding: 24px 28px 36px;
+    }
+  }
+
+  /* Bento Grid Card Primitive */
+  .bento-card {
+    background: #FFFFFF;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    padding: 1.25rem;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .bento-card:hover {
+    border-color: rgba(203, 213, 225, 0.9);
+  }
+
+  /* Preserved UI helpers for child views */
+  .ui-card { background:#fff; border:1px solid rgba(226, 232, 240, 0.8); border-radius:1rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .ui-card-h { padding:14px 18px; border-bottom:1px solid #f1f5f9; }
+  .ui-card-t { font:700 15px/1.2 'Nunito', 'Inter', sans-serif; color:#212121; }
+  .ui-card-d { font:400 12.5px/1.4 'Inter', sans-serif; color:#64748b; margin-top:2px; }
+  .ui-card-b { padding:18px; }
+  .ui-kpi { font:800 28px/1 'Nunito', sans-serif; letter-spacing:-.02em; color:#212121; }
+  .ui-kpi-label { font:600 12px/1.2 'Inter', sans-serif; text-transform:uppercase; letter-spacing:.05em; color:#64748b; }
+  .ui-kpi-sub { font:400 12.5px/1.3 'Inter', sans-serif; color:#64748b; margin-top:4px; }
+
+  /* Standard Table Action Button Highlights */
+  .btn-action-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: #0D63A5;
+    color: #FFFFFF !important;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(13, 99, 165, 0.2);
+  }
+  .btn-action-edit:hover {
+    background-color: #0A4F84;
+    color: #FFFFFF !important;
+  }
+
+  .btn-action-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: #DC2626;
+    color: #FFFFFF !important;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(220, 38, 38, 0.2);
+  }
+  .btn-action-danger:hover {
+    background-color: #B91C1C;
+    color: #FFFFFF !important;
+  }
+
+  .btn-action-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: #16A34A;
+    color: #FFFFFF !important;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(22, 163, 74, 0.2);
+  }
+  .btn-action-success:hover {
+    background-color: #15803D;
+    color: #FFFFFF !important;
+  }
+
+  .btn-action-warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: #D97706;
+    color: #FFFFFF !important;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(217, 119, 6, 0.2);
+  }
+  .btn-action-warning:hover {
+    background-color: #B45309;
+    color: #FFFFFF !important;
+  }
+
+  .btn-action-muted {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: #64748B;
+    color: #FFFFFF !important;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-action-muted:hover {
+    background-color: #475569;
+    color: #FFFFFF !important;
+  }
+
+  /* Action Buttons General */
+  .ui-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:0.75rem; padding:8px 16px; font:600 13px/1.2 'Inter', sans-serif; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:.15s; }
   .ui-btn-primary { background:#0D63A5; color:#fff; } .ui-btn-primary:hover { background:#0A4F84; }
-  .ui-btn-secondary { background:#fff; color:#111827; border-color:#d9dde5; } .ui-btn-secondary:hover { background:#f8f9fb; }
-  .ui-btn-ghost { background:transparent; color:#374151; } .ui-btn-ghost:hover { background:#f3f4f6; }
+  .ui-btn-secondary { background:#fff; color:#212121; border-color:#e2e8f0; } .ui-btn-secondary:hover { background:#f8fafc; border-color:#cbd5e1; }
+  .ui-btn-ghost { background:transparent; color:#475569; } .ui-btn-ghost:hover { background:#f1f5f9; color:#0f172a; }
   .ui-btn-danger { background:#fff; color:#dc2626; border-color:#fecaca; } .ui-btn-danger:hover { background:#fef2f2; }
-  .ui-btn-dark { background:#111827; color:#fff; } .ui-btn-dark:hover { background:#1f2937; }
-  .ui-btn-sm { padding:6px 10px; font-size:12.5px; border-radius:8px; }
-  .ui-link { color:#0D63A5; font-weight:600; text-decoration:none; } .ui-link:hover { text-decoration:underline; }
-  .ui-input, .ui-select { width:100%; border:1px solid #d9dde5; border-radius:10px; padding:8px 11px; font:400 13.5px/1.3 Inter,sans-serif; color:#111827; background:#fff; }
+  .ui-btn-dark { background:#212121; color:#fff; } .ui-btn-dark:hover { background:#111827; }
+  .ui-btn-sm { padding:6px 12px; font-size:12px; border-radius:0.625rem; }
+
+  /* Forms & Tables */
+  .ui-input, .ui-select { width:100%; border:1px solid #cbd5e1; border-radius:0.75rem; padding:9px 12px; font:400 13.5px/1.3 'Inter', sans-serif; color:#212121; background:#fff; transition: border-color .15s; }
   .ui-input:focus, .ui-select:focus { outline:none; border-color:#0D63A5; box-shadow:0 0 0 3px rgba(13,99,165,.12); }
-  .ui-label { display:block; font:600 12.5px/1.2 Inter,sans-serif; color:#374151; margin-bottom:5px; }
-  .ui-badge { display:inline-flex; align-items:center; border-radius:999px; padding:2px 8px; font:600 11px/1.4 Inter,sans-serif; }
-  .ui-badge-success { background:#dcfce7; color:#166534; } .ui-badge-warning { background:#fef3c7; color:#92400e; }
-  .ui-badge-danger { background:#fee2e2; color:#991b1b; } .ui-badge-muted { background:#f3f4f6; color:#4b5563; } .ui-badge-info { background:#e0f2fe; color:#075985; }
+  .ui-label { display:block; font:600 12.5px/1.2 'Inter', sans-serif; color:#334155; margin-bottom:5px; }
+
+  /* Semantic status pill badges */
+  .ui-badge { display:inline-flex; align-items:center; border-radius:9999px; padding:3px 10px; font:600 11.5px/1.3 'Inter', sans-serif; }
+  .ui-badge-success { background:#dcfce7; color:#15803d; border:1px solid rgba(187, 247, 208, 0.8); }
+  .ui-badge-warning { background:#fef3c7; color:#b45309; border:1px solid rgba(253, 230, 138, 0.8); }
+  .ui-badge-danger { background:#fee2e2; color:#b91c1c; border:1px solid rgba(254, 202, 202, 0.8); }
+  .ui-badge-muted { background:#f1f5f9; color:#475569; border:1px solid rgba(226, 232, 240, 0.8); }
+  .ui-badge-info { background:#e0f2fe; color:#0369a1; border:1px solid rgba(186, 230, 253, 0.8); }
+
   .ui-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  .ui-table { width:100%; border-collapse:separate; border-spacing:0; font:400 13px/1.4 Inter,sans-serif; }
-  .ui-table th { text-align:left; padding:10px 14px; font:600 11.5px/1.2 Inter,sans-serif; text-transform:uppercase; letter-spacing:.04em; color:#6b7280; background:#fafbfc; border-bottom:1px solid #eef0f4; white-space:nowrap; }
-  .ui-table td { padding:11px 14px; border-bottom:1px solid #f1f3f6; color:#111827; vertical-align:middle; }
-  .ui-table tbody tr:hover { background:#fafbfc; }
+  .ui-table { width:100%; border-collapse:separate; border-spacing:0; font:400 13px/1.4 'Inter', sans-serif; }
+  .ui-table th { text-align:left; padding:12px 16px; font:600 11.5px/1.2 'Inter', sans-serif; text-transform:uppercase; letter-spacing:.05em; color:#64748b; background:#f8fafc; border-bottom:1px solid #e2e8f0; white-space:nowrap; }
+  .ui-table td { padding:13px 16px; border-bottom:1px solid #f1f5f9; color:#212121; vertical-align:middle; }
+  .ui-table tbody tr:hover { background:#f8fafc; }
   .ui-table tbody tr:last-child td { border-bottom:0; }
-  .ui-alert { border-radius:12px; padding:11px 14px; font:400 13px/1.45 Inter,sans-serif; border:1px solid; }
+
+  .ui-alert { border-radius:0.875rem; padding:12px 16px; font:400 13px/1.45 'Inter', sans-serif; border:1px solid; }
   .ui-alert-success { background:#f0fdf4; color:#166534; border-color:#bbf7d0; }
   .ui-alert-danger { background:#fef2f2; color:#991b1b; border-color:#fecaca; }
   .ui-alert-warning { background:#fffbeb; color:#92400e; border-color:#fde68a; }
-  .page-h { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
-  .page-title { font:800 22px/1.15 Nunito,Inter,sans-serif; color:#111827; margin:0; letter-spacing:-.01em; }
-  .page-desc { font:400 13.5px/1.45 Inter,sans-serif; color:#6b7280; margin-top:2px; }
+
+  .page-h { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:20px; }
+  .page-title { font:800 24px/1.15 'Nunito', sans-serif; color:#212121; margin:0; letter-spacing:-.02em; }
+  .page-desc { font:400 13.5px/1.45 'Inter', sans-serif; color:#64748b; margin-top:2px; }
 </style>
 
-<div class="shell" id="appShell">
-  {{-- Desktop sidebar (edge, collapsible) --}}
-  <aside class="app-sidebar hidden lg:flex">
-    <div class="h-14 flex items-center justify-between gap-2 px-3 border-b border-gray-100 shrink-0">
-      <a href="{{ $homeRoute }}" class="flex items-center gap-2 min-w-0 px-1">
-        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-white font-heading font-extrabold text-sm shrink-0">P</span>
-        <span class="brand-text min-w-0">
-          <span class="block font-heading font-extrabold text-[15px] text-gray-900 leading-tight">Parkirin</span>
-          <span class="block text-[10.5px] text-gray-500 leading-tight">{{ $roleLabel }}</span>
-        </span>
+<div x-data="{
+        collapsed: (function() {
+            try { return localStorage.getItem('parkirin_sidebar_collapsed') === '1'; } catch(e) { return false; }
+        })(),
+        toggle() {
+            this.collapsed = !this.collapsed;
+            try { localStorage.setItem('parkirin_sidebar_collapsed', this.collapsed ? '1' : '0'); } catch(e) {}
+        }
+    }"
+    :class="{ 'is-collapsed': collapsed }"
+    class="shell"
+    id="appShell">
+
+  {{-- ═══════════════════════════════════════════
+      DESKTOP COLLAPSIBLE SIDEBAR (hidden on mobile, visible md+)
+      Layar Desktop (md: ke atas): Tampilkan HANYA Collapsible Sidebar (hidden md:flex)
+      Layar Mobile (< md): Sembunyikan Sidebar sepenuhnya (hidden)
+  ═══════════════════════════════════════════ --}}
+  <aside class="app-sidebar hidden md:flex" aria-label="Sidebar Navigasi Desktop">
+    {{-- Header Logo Area --}}
+    <div class="h-16 flex items-center justify-between border-b border-slate-100 shrink-0 px-4">
+      <a href="{{ $homeRoute }}" class="flex items-center min-w-0" aria-label="Beranda Parkirin">
+        {{-- Expanded: Tampilkan HANYA Teks.svg (Logo lengkap) --}}
+        <template x-if="!collapsed">
+          <img src="{{ asset('assets/logo/primary/Teks.svg') }}" alt="Parkirin" class="h-7 w-auto object-contain">
+        </template>
+        {{-- Collapsed: Tampilkan HANYA Icon.svg (Ikon tunggal) --}}
+        <template x-if="collapsed">
+          <div class="w-full flex justify-center">
+            <img src="{{ asset('assets/logo/primary/Icon.svg') }}" alt="Parkirin" class="h-8 w-auto object-contain mx-auto">
+          </div>
+        </template>
       </a>
-      <button type="button" id="sidebarToggle" class="ui-btn-ghost rounded-lg p-1.5 text-gray-500 shrink-0" title="Ciutkan/luaskan sidebar" aria-label="Toggle sidebar">
-        <span class="toggle-icon">{!! $icon('collapse','w-4 h-4') !!}</span>
-      </button>
     </div>
-    <div class="flex-1 overflow-y-auto py-3 px-2">
-      <div class="nav-section px-3 pb-1 text-[10.5px] font-semibold uppercase tracking-[.06em] text-gray-400">Navigasi</div>
-      <nav class="space-y-0.5">
-        @foreach($navItems as $item)
-          @php $active = request()->routeIs($item['active']); @endphp
-          <a href="{{ route($item['route']) }}" class="nav-link {{ $active ? 'active' : '' }}" title="{{ $item['label'] }}">
-            {!! $icon($item['icon'],'w-[18px] h-[18px] shrink-0') !!}
-            <span class="nav-text">{{ $item['label'] }}</span>
-          </a>
-        @endforeach
-      </nav>
+
+    {{-- Middle Navigation Area --}}
+    <div class="flex-1 overflow-y-auto py-4 px-2 space-y-4">
+      <div>
+        <div class="nav-section-title px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[.06em] text-slate-400">
+          Menu Utama
+        </div>
+        <nav class="space-y-1">
+          @foreach($navItems as $item)
+            @php $active = request()->routeIs($item['active']); @endphp
+            <a href="{{ route($item['route']) }}"
+               class="nav-link {{ $active ? 'active' : '' }}"
+               :title="collapsed ? '{{ $item['label'] }}' : ''">
+              {!! $icon($item['icon'], 'w-5 h-5 shrink-0') !!}
+              <span class="nav-text">{{ $item['label'] }}</span>
+            </a>
+          @endforeach
+        </nav>
+      </div>
+
       @hasSection('sidebar-extra')
-        <div class="nav-section px-3 pt-4 pb-1 text-[10.5px] font-semibold uppercase tracking-[.06em] text-gray-400">Lainnya</div>
-        <div class="nav-text text-sm space-y-0.5">@yield('sidebar-extra')</div>
+        <div>
+          <div class="nav-section-title px-3 pt-2 pb-1.5 text-[11px] font-bold uppercase tracking-[.06em] text-slate-400">
+            Aksi Tambahan
+          </div>
+          <div class="nav-text space-y-1">
+            @yield('sidebar-extra')
+          </div>
+        </div>
       @endif
     </div>
-    <div class="border-t border-gray-100 p-2 shrink-0">
-      <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg">
-        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-xs shrink-0">{{ strtoupper(mb_substr($authUser?->nama_lengkap ?? 'U',0,1)) }}</span>
-        <div class="user-meta min-w-0 flex-1">
-          <div class="text-[13px] font-semibold text-gray-900 truncate">{{ $authUser?->nama_lengkap }}</div>
-          <div class="text-[11px] text-gray-500 truncate">{{ $authUser?->tempatParkir->nama_tempat ?? $roleLabel }}</div>
+
+    {{-- Bottom Account & Toggle Section (Reference: dashboard-with-collapsible-sidebar) --}}
+    <div class="border-t border-slate-100 p-2.5 shrink-0 bg-slate-50/60">
+      {{-- User Profile Snippet --}}
+      <template x-if="!collapsed">
+        <div class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-white border border-slate-200/70 shadow-2xs mb-2">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-heading font-extrabold text-xs shrink-0 ring-1 ring-primary/20">
+            {{ strtoupper(mb_substr($authUser?->nama_lengkap ?? 'U', 0, 1)) }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-bold text-[#212121] truncate">{{ $authUser?->nama_lengkap }}</div>
+            <div class="text-[11px] text-slate-500 truncate">{{ $authUser?->tempatParkir->nama_tempat ?? $roleLabel }}</div>
+          </div>
         </div>
-      </div>
-      <form method="POST" action="{{ route('logout') }}" class="mt-1">
-        @csrf
-        <button type="submit" class="nav-link w-full text-red-600 hover:bg-red-50 hover:text-red-700" title="Keluar">
-          {!! $icon('logout','w-[18px] h-[18px] shrink-0') !!}<span class="nav-text">Keluar</span>
+      </template>
+
+      <template x-if="collapsed">
+        <div class="flex justify-center mb-2" title="{{ $authUser?->nama_lengkap }} ({{ $roleLabel }})">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-heading font-extrabold text-xs ring-1 ring-primary/20">
+            {{ strtoupper(mb_substr($authUser?->nama_lengkap ?? 'U', 0, 1)) }}
+          </span>
+        </div>
+      </template>
+
+      {{-- Collapsible Sidebar Button `<< Hide` / `>>` --}}
+      <div class="flex items-center gap-1.5" :class="collapsed ? 'flex-col' : 'justify-between px-1'">
+        <button type="button"
+                @click="toggle()"
+                class="inline-flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-slate-500 hover:text-primary hover:bg-slate-100 transition group text-left"
+                :title="collapsed ? 'Lebarkan Sidebar (>>)' : 'Ciutkan Sidebar (<<)'">
+          <span class="text-[10.5px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-primary nav-section-title">Account</span>
+          <span class="text-xs font-extrabold text-slate-600 group-hover:text-primary flex items-center gap-1">
+            <span x-text="collapsed ? '»' : '« Hide'"></span>
+          </span>
         </button>
-      </form>
+
+        {{-- Logout button --}}
+        <form method="POST" action="{{ route('logout') }}" class="m-0">
+          @csrf
+          <button type="submit"
+                  class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                  title="Keluar">
+            {!! $icon('logout', 'w-4 h-4') !!}
+          </button>
+        </form>
+      </div>
     </div>
   </aside>
 
+  {{-- ═══════════════════════════════════════════
+      MAIN VIEW AREA
+  ═══════════════════════════════════════════ --}}
   <div class="app-main">
-    {{-- Top bar --}}
+    {{-- Modern Top Header: Breadcrumb & Role + Profile Indicator --}}
     <header class="app-topbar">
       <div class="flex items-center gap-3 min-w-0">
-        <a href="{{ $homeRoute }}" class="lg:hidden inline-flex items-center gap-2">
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-white font-heading font-extrabold text-sm">P</span>
-          <span class="font-heading font-extrabold text-gray-900">Parkirin</span>
+        {{-- Mobile Logo Header: Tampilkan HANYA Icon.svg (Ikon tunggal) --}}
+        <a href="{{ $homeRoute }}" class="md:hidden inline-flex items-center shrink-0 pr-1" aria-label="Beranda Parkirin">
+          <img src="{{ asset('assets/logo/primary/Icon.svg') }}" alt="Parkirin" class="h-7 w-auto object-contain">
         </a>
-        <div class="hidden sm:block min-w-0">
-          <div class="text-[13.5px] font-semibold text-gray-900 truncate">@yield('page-title', $roleLabel)</div>
-          @hasSection('page-desc')<div class="text-[11.5px] text-gray-500 truncate">@yield('page-desc')</div>@endif
+
+        {{-- Breadcrumb Navigation (Left side) --}}
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 text-xs font-medium text-slate-400 truncate">
+            <span class="hover:text-primary transition font-semibold text-slate-500">Parkirin</span>
+            <svg class="w-3 h-3 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            <span class="text-slate-600 font-semibold truncate">{{ $roleLabel }}</span>
+            <svg class="w-3 h-3 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            <span class="text-[#212121] font-bold truncate">@yield('page-title', 'Overview')</span>
+          </div>
+          @hasSection('page-desc')
+            <div class="hidden sm:block text-[11.5px] text-slate-500 truncate mt-0.5">@yield('page-desc')</div>
+          @endif
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="ui-badge ui-badge-info hidden md:inline-flex">{{ $roleLabel }}</span>
+
+      {{-- Role Indicator & Profile (Right side) --}}
+      <div class="flex items-center gap-2 sm:gap-3">
         @if($authUser?->tempatParkir)
-          <span class="hidden lg:inline text-[12px] text-gray-500 max-w-[220px] truncate">{{ $authUser->tempatParkir->nama_tempat }}</span>
+          <span class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
+            <svg class="w-3.5 h-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <span class="max-w-[170px] truncate">{{ $authUser->tempatParkir->nama_tempat }}</span>
+          </span>
         @endif
-        <form method="POST" action="{{ route('logout') }}" class="lg:hidden m-0">
-          @csrf
-          <button type="submit" class="ui-btn ui-btn-ghost p-2 text-red-600" aria-label="Keluar">{!! $icon('logout','w-5 h-5') !!}</button>
-        </form>
+
+        {{-- Role Pill Badge --}}
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          <span>{{ $roleLabel }}</span>
+        </span>
+
+        {{-- User Profile Pill & Quick Logout for Mobile --}}
+        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-primary text-white font-heading font-extrabold text-xs flex items-center justify-center shadow-xs shrink-0">
+            {{ strtoupper(mb_substr($authUser?->nama_lengkap ?? 'U', 0, 1)) }}
+          </div>
+          <div class="hidden xl:block text-left">
+            <div class="text-xs font-bold text-[#212121] leading-tight truncate max-w-[130px]">{{ $authUser?->nama_lengkap }}</div>
+            <div class="text-[10.5px] text-slate-400 leading-tight truncate">{{ $authUser?->username ?? $roleLabel }}</div>
+          </div>
+          <form method="POST" action="{{ route('logout') }}" class="md:hidden m-0">
+            @csrf
+            <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="Keluar">
+              {!! $icon('logout', 'w-4 h-4') !!}
+            </button>
+          </form>
+        </div>
       </div>
     </header>
 
+    {{-- Main Content Canvas --}}
     <main class="content-wrap">
       @if(session('success'))
-        <div class="ui-alert ui-alert-success mb-4">{{ session('success') }}</div>
-      @endif
-      @if(session('error'))
-        <div class="ui-alert ui-alert-danger mb-4">{{ session('error') }}</div>
-      @endif
-      @if($errors->any())
-        <div class="ui-alert ui-alert-danger mb-4">
-          <ul class="list-disc pl-5 space-y-0.5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        <div class="ui-alert ui-alert-success mb-5 flex items-center gap-2 shadow-2xs">
+          <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <span>{{ session('success') }}</span>
         </div>
       @endif
+      @if(session('error'))
+        <div class="ui-alert ui-alert-danger mb-5 flex items-center gap-2 shadow-2xs">
+          <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <span>{{ session('error') }}</span>
+        </div>
+      @endif
+      @if(isset($errors) && $errors->any())
+        <div class="ui-alert ui-alert-danger mb-5 shadow-2xs">
+          <div class="font-semibold text-xs mb-1">Periksa kembali data input:</div>
+          <ul class="list-disc pl-5 space-y-0.5 text-xs">
+            @foreach($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
       @yield('staff-content')
     </main>
   </div>
 
-  {{-- Mobile bottom nav --}}
-  <nav class="bottom-nav" aria-label="Navigasi utama">
+  {{-- ═══════════════════════════════════════════
+      MOBILE BOTTOM NAVIGATION BAR
+      Layar Mobile (< md): Tampilkan HANYA Bottom Navigation Bar
+      Layar Desktop (md: ke atas): Sembunyikan Bottom Navigation Bar (md:hidden)
+      Khusus Admin / menu banyak: Scroll horizontal tanpa mengecilkan/menimpa menu
+  ═══════════════════════════════════════════ --}}
+  <nav class="bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.07)] px-3 py-2 overflow-x-auto flex items-center {{ count($navItems) > 4 ? 'justify-start' : 'justify-around' }} gap-2"
+       aria-label="Navigasi Utama Mobile">
     @foreach($navItems as $item)
       @php $active = request()->routeIs($item['active']); @endphp
-      <a href="{{ route($item['route']) }}" class="bnav-item {{ $active ? 'active' : '' }}">
-        {!! $icon($item['icon'],'w-[22px] h-[22px]') !!}
-        <span>{{ $item['label'] }}</span>
+      <a href="{{ route($item['route']) }}"
+         class="shrink-0 min-w-[70px] px-2.5 py-1.5 flex flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 {{ $active ? 'bnav-active text-primary bg-primary/10 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50' }}">
+        {!! $icon($item['icon'], 'w-5 h-5 shrink-0') !!}
+        <span class="leading-tight">{{ $item['label'] }}</span>
       </a>
     @endforeach
   </nav>
@@ -226,18 +600,21 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
-(function(){
-  const shell = document.getElementById('appShell');
-  const btn = document.getElementById('sidebarToggle');
-  if(!shell||!btn) return;
-  const key = 'parkirin.sidebar.collapsed';
-  try { if(localStorage.getItem(key)==='1') shell.classList.add('is-collapsed'); } catch(e){}
-  btn.addEventListener('click', function(){
-    shell.classList.toggle('is-collapsed');
-    try { localStorage.setItem(key, shell.classList.contains('is-collapsed') ? '1':'0'); } catch(e){}
-  });
-})();
+  // Fallback initial sync if Alpine loads slightly after DOM
+  (function(){
+    try {
+      if (localStorage.getItem('parkirin_sidebar_collapsed') === '1') {
+        var el = document.getElementById('appShell');
+        if (el) el.classList.add('is-collapsed');
+      }
+    } catch(e) {}
+
+    // Auto-scroll item aktif ke tengah pandangan pada mobile bottom nav
+    var activeBnav = document.querySelector('.bottom-nav .bnav-active');
+    if (activeBnav) {
+      activeBnav.scrollIntoView({ inline: 'center', block: 'nearest' });
+    }
+  })();
 </script>
 @endpush

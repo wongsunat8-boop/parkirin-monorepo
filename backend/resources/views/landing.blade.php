@@ -9,11 +9,8 @@
 ═══════════════════════════════════════════ --}}
 <nav class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        <a href="{{ route('landing') }}" class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4"/></svg>
-            </div>
-            <span class="font-heading font-black text-2xl text-dark tracking-tight">Park<span class="text-primary">irin</span></span>
+        <a href="{{ route('landing') }}" class="flex items-center group py-1" aria-label="Beranda Parkirin">
+            <img src="{{ asset('assets/logo/primary/Teks.svg') }}" alt="Parkirin" class="h-8 sm:h-9 w-auto object-contain">
         </a>
 
         {{-- Desktop Navigation Links --}}
@@ -654,11 +651,8 @@
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {{-- Brand Column --}}
             <div>
-                <a href="{{ route('landing') }}" class="flex items-center gap-2 mb-4 group">
-                    <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:bg-primary-light transition">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4"/></svg>
-                    </div>
-                    <span class="font-heading font-black text-xl text-white">Park<span class="text-primary-light">irin</span></span>
+                <a href="{{ route('landing') }}" class="inline-flex items-center mb-5 group" aria-label="Beranda Parkirin">
+                    <img src="{{ asset('assets/logo/white/Teks.svg') }}" alt="Parkirin" class="h-8 sm:h-9 w-auto object-contain">
                 </a>
                 <p class="text-sm text-white/55 leading-relaxed">
                     Sistem parkir cerdas multi-tenant portable untuk operator parkir swadaya di seluruh Indonesia. Aman, fleksibel, profesional, dan terpercaya.
