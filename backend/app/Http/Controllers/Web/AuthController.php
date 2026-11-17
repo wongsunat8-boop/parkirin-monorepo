@@ -38,13 +38,14 @@ class AuthController extends Controller
             return back()->withErrors(['username' => 'Username atau password salah.'])->withInput();
         }
 
-        /** @var User|null $user */
-        $user = Auth::guard('web')->user()?->loadMissing('tempatParkir:id_tempat_parkir,status_aktif');
+        $user = Auth::guard('web')->user();
 
         if (!$user instanceof User) {
             Auth::guard('web')->logout();
             return back()->withErrors(['username' => 'Username atau password salah.'])->withInput();
         }
+
+        $user->loadMissing('tempatParkir:id_tempat_parkir,status_aktif');
 
         // Pengecekan 1: status tenant (untuk user terikat tenant). Berlaku terlepas dari status akun.
         if ($user->id_tempat_parkir && !$user->isSuperAdmin()) {

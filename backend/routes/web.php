@@ -18,6 +18,12 @@ use App\Http\Controllers\Web\Admin\KendaraanController as AdminKendaraanControll
 use App\Http\Controllers\Web\Admin\PengendaraController as AdminPengendaraController;
 use App\Http\Controllers\Web\Admin\LogAktivitasController as AdminLogAktivitasController;
 use App\Http\Controllers\Web\Petugas\DashboardController as PetugasDashboardController;
+use App\Http\Controllers\Web\Pengendara\DashboardController as PengendaraDashboardController;
+use App\Http\Controllers\Web\Pengendara\RiwayatController as PengendaraRiwayatController;
+use App\Http\Controllers\Web\Pengendara\KatalogController as PengendaraKatalogController;
+use App\Http\Controllers\Web\Pengendara\NotifikasiController as PengendaraNotifikasiController;
+use App\Http\Controllers\Web\Pengendara\ProfilController as PengendaraProfilController;
+use App\Http\Controllers\Web\Pengendara\KendaraanController as PengendaraKendaraanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,8 +69,35 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 | Protected Routes — Pengendara (Customer)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth:pengendara'])->prefix('pengendara')->group(function () {
-    Route::get('/', fn () => 'Dashboard Pengendara — Coming soon')->name('pengendara.dashboard');
+Route::middleware(['auth:pengendara', 'pengendara.active'])->prefix('pengendara')->name('pengendara.')->group(function () {
+    Route::get('/', [PengendaraDashboardController::class, 'index'])->name('dashboard');
+
+    // Kendaraan pribadi (widget dashboard, tanpa keluar Site Map)
+    Route::post('/kendaraan', [PengendaraKendaraanController::class, 'store'])->name('kendaraan.store');
+    Route::patch('/kendaraan/{kendaraan}', [PengendaraKendaraanController::class, 'update'])->name('kendaraan.update');
+    Route::post('/kendaraan/{kendaraan}/unlink', [PengendaraKendaraanController::class, 'unlink'])->name('kendaraan.unlink');
+    Route::post('/kendaraan/klaim', [PengendaraKendaraanController::class, 'ajukanKlaim'])->name('kendaraan.klaim');
+
+    // Pembayaran karcis digital (simulasi web; booking parkir hanya di mobile)
+    Route::post('/transaksi/{transaksi}/bayar', [PengendaraDashboardController::class, 'bayarCashless'])->name('transaksi.bayar');
+
+    Route::get('/riwayat', [PengendaraRiwayatController::class, 'index'])->name('riwayat.index');
+    Route::post('/riwayat/transaksi/{transaksi}/bayar', [PengendaraRiwayatController::class, 'bayarCashless'])->name('riwayat.bayar');
+    Route::get('/riwayat/transaksi/{transaksi}/struk', [PengendaraRiwayatController::class, 'struk'])->name('riwayat.struk');
+
+    // Katalog: lihat daftar & detail saja (booking khusus aplikasi mobile)
+    Route::get('/katalog', [PengendaraKatalogController::class, 'index'])->name('katalog.index');
+    Route::get('/katalog/{tempatParkir}', [PengendaraKatalogController::class, 'show'])->name('katalog.show');
+
+    Route::get('/notifikasi', [PengendaraNotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/klaim/{klaim}/setujui', [PengendaraNotifikasiController::class, 'setujui'])->name('notifikasi.klaim.setujui');
+    Route::post('/notifikasi/klaim/{klaim}/tolak', [PengendaraNotifikasiController::class, 'tolak'])->name('notifikasi.klaim.tolak');
+
+    Route::get('/profil', [PengendaraProfilController::class, 'index'])->name('profil.index');
+    Route::patch('/profil', [PengendaraProfilController::class, 'updateProfil'])->name('profil.update');
+    Route::patch('/profil/password', [PengendaraProfilController::class, 'updatePassword'])->name('profil.password');
+    Route::post('/profil/telepon/otp', [PengendaraProfilController::class, 'kirimOtp'])->name('profil.telepon.otp');
+    Route::patch('/profil/telepon', [PengendaraProfilController::class, 'verifikasiTelepon'])->name('profil.telepon');
 });
 
 /*

@@ -2,262 +2,105 @@
 
 namespace Database\Seeders;
 
-use App\Models\Booking;
-use App\Models\Kendaraan;
-use App\Models\Pengendara;
-use App\Models\Tarif;
-use App\Models\TempatParkir;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database with realistic data.
-     *
-     * - 1 Super Admin
-     * - 2 Tenants (1 Flat Harian stasiun, 1 Progresif Mal)
-     * - Each tenant: 1 Owner, 1 Admin, 1 Petugas, 3 active Tariffs
-     * - 3 Pengendara accounts with vehicles
-     */
     public function run(): void
     {
-        // ══════════════════════════════════════
-        // 1. SUPER ADMIN
-        // ══════════════════════════════════════
-        User::create([
-            'id_tempat_parkir' => null,
-            'nama_lengkap'     => 'Super Admin Parkirin',
-            'username'         => 'superadmin',
-            'password'         => Hash::make('password123'),
-            'role'             => 'super_admin',
-            'status_aktif'     => 1,
+        // 1. Buat 1 Tempat Parkir (Tenant)
+        $tenantId = DB::table('tempat_parkir')->insertGetId([
+            'nama_tempat' => 'Parkiran Stasiun Sudimara',
+            'kapasitas_reguler' => 200,
+            'kuota_inap' => 50,
+            'sediakan_booking_inap' => 1,
+            'sediakan_member' => 1,
+            'status_aktif' => 1,
         ]);
 
-        // ══════════════════════════════════════
-        // 2. TENANT 1 — Stasiun Gambir (Flat Harian)
-        // ══════════════════════════════════════
-        $tenant1 = TempatParkir::create([
-            'nama_tempat'      => 'Parkir Stasiun Gambir',
-            'kapasitas'        => 150,
-            'terisi'           => 0,
-            'sediakan_booking' => 1,
-            'status_aktif'     => 1,
+        // 2. Buat Akun Users (Super Admin, Owner, Admin, Petugas)
+        DB::table('user')->insert([
+            ['id_tempat_parkir' => null, 'nama_lengkap' => 'Super Admin', 'username' => 'superadmin', 'password' => Hash::make('password'), 'role' => 'super_admin'],
+            ['id_tempat_parkir' => $tenantId, 'nama_lengkap' => 'Pak Hendra (Owner)', 'username' => 'owner1', 'password' => Hash::make('password'), 'role' => 'owner'],
+            ['id_tempat_parkir' => $tenantId, 'nama_lengkap' => 'Admin Operasional', 'username' => 'admin1', 'password' => Hash::make('password'), 'role' => 'admin'],
+            ['id_tempat_parkir' => $tenantId, 'nama_lengkap' => 'Petugas Jaga', 'username' => 'petugas1', 'password' => Hash::make('password'), 'role' => 'petugas'],
         ]);
 
-        $owner1 = User::create([
-            'id_tempat_parkir' => $tenant1->id_tempat_parkir,
-            'nama_lengkap'     => 'Budi Hartono',
-            'username'         => 'owner_gambir',
-            'password'         => Hash::make('password123'),
-            'role'             => 'owner',
-            'status_aktif'     => 1,
-        ]);
-
-        $admin1 = User::create([
-            'id_tempat_parkir' => $tenant1->id_tempat_parkir,
-            'nama_lengkap'     => 'Siti Aminah',
-            'username'         => 'admin_gambir',
-            'password'         => Hash::make('password123'),
-            'role'             => 'admin',
-            'status_aktif'     => 1,
-        ]);
-
-        $petugas1 = User::create([
-            'id_tempat_parkir' => $tenant1->id_tempat_parkir,
-            'nama_lengkap'     => 'Joko Susilo',
-            'username'         => 'petugas_gambir',
-            'password'         => Hash::make('password123'),
-            'role'             => 'petugas',
-            'status_aktif'     => 1,
-        ]);
-
-        // Tarif Tenant 1 — Flat Harian
-        Tarif::create([
-            'id_tempat_parkir'  => $tenant1->id_tempat_parkir,
-            'jenis_kendaraan'   => 'Motor',
-            'tipe_tarif'        => 'Flat Harian',
-            'tarif_per_jam'     => 5000.00,
-            'tarif_jam_pertama' => 0.00,
-            'tarif_berikutnya'  => 0.00,
-            'tarif_inap'        => 3000.00,
-            'status_aktif'      => 1,
-        ]);
-
-        Tarif::create([
-            'id_tempat_parkir'  => $tenant1->id_tempat_parkir,
-            'jenis_kendaraan'   => 'Mobil',
-            'tipe_tarif'        => 'Flat Harian',
-            'tarif_per_jam'     => 10000.00,
-            'tarif_jam_pertama' => 0.00,
-            'tarif_berikutnya'  => 0.00,
-            'tarif_inap'        => 5000.00,
-            'status_aktif'      => 1,
-        ]);
-
-        Tarif::create([
-            'id_tempat_parkir'  => $tenant1->id_tempat_parkir,
-            'jenis_kendaraan'   => 'Sepeda',
-            'tipe_tarif'        => 'Flat Harian',
-            'tarif_per_jam'     => 2000.00,
-            'tarif_jam_pertama' => 0.00,
-            'tarif_berikutnya'  => 0.00,
-            'tarif_inap'        => 1000.00,
-            'status_aktif'      => 1,
-        ]);
-
-        // ══════════════════════════════════════
-        // 3. TENANT 2 — Mall Grand Indonesia (Progresif Mal)
-        // ══════════════════════════════════════
-        $tenant2 = TempatParkir::create([
-            'nama_tempat'      => 'Parkir Mall Grand Indonesia',
-            'kapasitas'        => 500,
-            'terisi'           => 0,
-            'sediakan_booking' => 1,
-            'status_aktif'     => 1,
-        ]);
-
-        $owner2 = User::create([
-            'id_tempat_parkir' => $tenant2->id_tempat_parkir,
-            'nama_lengkap'     => 'Andi Wijaya',
-            'username'         => 'owner_grandindonesia',
-            'password'         => Hash::make('password123'),
-            'role'             => 'owner',
-            'status_aktif'     => 1,
-        ]);
-
-        $admin2 = User::create([
-            'id_tempat_parkir' => $tenant2->id_tempat_parkir,
-            'nama_lengkap'     => 'Dewi Lestari',
-            'username'         => 'admin_grandindonesia',
-            'password'         => Hash::make('password123'),
-            'role'             => 'admin',
-            'status_aktif'     => 1,
-        ]);
-
-        $petugas2 = User::create([
-            'id_tempat_parkir' => $tenant2->id_tempat_parkir,
-            'nama_lengkap'     => 'Rudi Prasetyo',
-            'username'         => 'petugas_grandindonesia',
-            'password'         => Hash::make('password123'),
-            'role'             => 'petugas',
-            'status_aktif'     => 1,
-        ]);
-
-        // Tarif Tenant 2 — Progresif Mal
-        Tarif::create([
-            'id_tempat_parkir'  => $tenant2->id_tempat_parkir,
-            'jenis_kendaraan'   => 'Motor',
-            'tipe_tarif'        => 'Progresif Mal',
-            'tarif_per_jam'     => 0.00,
-            'tarif_jam_pertama' => 3000.00,
-            'tarif_berikutnya'  => 2000.00,
-            'tarif_inap'        => 5000.00,
-            'status_aktif'      => 1,
-        ]);
-
-        Tarif::create([
-            'id_tempat_parkir'  => $tenant2->id_tempat_parkir,
-            'jenis_kendaraan'   => 'Mobil',
-            'tipe_tarif'        => 'Progresif Mal',
-            'tarif_per_jam'     => 0.00,
-            'tarif_jam_pertama' => 5000.00,
-            'tarif_berikutnya'  => 3000.00,
-            'tarif_inap'        => 10000.00,
-            'status_aktif'      => 1,
-        ]);
-
-        Tarif::create([
-            'id_tempat_parkir'  => $tenant2->id_tempat_parkir,
-            'jenis_kendaraan'   => 'Sepeda',
-            'tipe_tarif'        => 'Progresif Mal',
-            'tarif_per_jam'     => 0.00,
-            'tarif_jam_pertama' => 1000.00,
-            'tarif_berikutnya'  => 500.00,
-            'tarif_inap'        => 2000.00,
-            'status_aktif'      => 1,
-        ]);
-
-        // ══════════════════════════════════════
-        // 4. PENGENDARA (3 accounts + vehicles)
-        // ══════════════════════════════════════
-        $pengendara1 = Pengendara::create([
-            'nama_lengkap'   => 'Ahmad Fauzi',
-            'email'          => 'ahmad.fauzi@gmail.com',
-            'no_telepon'     => '081234567890',
-            'username'       => 'ahmadfauzi',
-            'password'       => Hash::make('password123'),
-            'skor_reputasi'  => 100,
-            'status_aktif'   => 1,
-        ]);
-
-        Kendaraan::create([
-            'plat_nomor'      => 'B1234XYZ',
+        // 3. Buat Tarif Parkir
+        $tarifId = DB::table('tarif')->insertGetId([
+            'id_tempat_parkir' => $tenantId,
             'jenis_kendaraan' => 'Motor',
-            'warna'           => 'Hitam',
-            'id_pengendara'   => $pengendara1->id_pengendara,
-            'id_user_input'   => null,
+            'tipe_tarif' => 'Flat Harian',
+            'tarif_per_jam' => 3000,
+            'tarif_jam_pertama' => 0,
+            'tarif_berikutnya' => 0,
+            'tarif_inap_harian' => 10000,
+            'denda_karcis_hilang' => 15000,
+            'status_aktif' => 1,
         ]);
 
-        Kendaraan::create([
-            'plat_nomor'      => 'B5678ABC',
-            'jenis_kendaraan' => 'Mobil',
-            'warna'           => 'Putih',
-            'id_pengendara'   => $pengendara1->id_pengendara,
-            'id_user_input'   => null,
+        // 4. Buat Data Pengendara & Kendaraan
+        $pengendaraId = DB::table('pengendara')->insertGetId([
+            'nama_lengkap' => 'Diana Barry',
+            'email' => 'diana@example.com',
+            'no_telepon' => '08123456789',
+            'username' => 'dianab',
+            'password' => Hash::make('password'),
+            'status_aktif' => 1,
         ]);
 
-        $pengendara2 = Pengendara::create([
-            'nama_lengkap'   => 'Rina Marlina',
-            'email'          => 'rina.marlina@yahoo.com',
-            'no_telepon'     => '085678901234',
-            'username'       => 'rinamarlina',
-            'password'       => Hash::make('password123'),
-            'skor_reputasi'  => 100,
-            'status_aktif'   => 1,
-        ]);
+        // Generate 10 Kendaraan Dummy
+        $kendaraanIds = [];
+        for ($i = 1; $i <= 10; $i++) {$kendaraanIds[] = DB::table('kendaraan')->insertGetId([
+                'plat_nomor' => 'B ' . rand(1000, 9999) . ' ABC',
+                'jenis_kendaraan' => 'Motor',
+                'warna' => 'Hitam',
+                'id_pengendara' => ($i === 1) ?$pengendaraId : null,
+            ]);
+        }
 
-        Kendaraan::create([
-            'plat_nomor'      => 'D2345QWE',
-            'jenis_kendaraan' => 'Motor',
-            'warna'           => 'Merah',
-            'id_pengendara'   => $pengendara2->id_pengendara,
-            'id_user_input'   => null,
-        ]);
+        // 5. Generate Ribuan Transaksi Dummy (Tahun 2025 & 2026 untuk Grafik YoY)
+        $transaksi = [];$startDate = Carbon::create(2025, 1, 1);
+        $endDate = Carbon::now();$globalCounter = 1; // Kunci Perbaikan: Counter global agar kode karcis 100% unik
 
-        Kendaraan::create([
-            'plat_nomor'      => 'D6789RTY',
-            'jenis_kendaraan' => 'Sepeda',
-            'warna'           => 'Biru',
-            'id_pengendara'   => $pengendara2->id_pengendara,
-            'id_user_input'   => null,
-        ]);
+        while ($startDate->lte($endDate)) {$jumlahTransaksiHariIni = rand(50, 150);
+            
+            for ($i = 0; $i < $jumlahTransaksiHariIni; $i++) {
+                $jamMasuk =$startDate->copy()->addHours(rand(6, 10))->addMinutes(rand(0, 59));
+                $jamKeluar =$jamMasuk->copy()->addHours(rand(8, 12))->addMinutes(rand(0, 59));
 
-        $pengendara3 = Pengendara::create([
-            'nama_lengkap'   => 'Dimas Prasetya',
-            'email'          => 'dimas.prasetya@outlook.com',
-            'no_telepon'     => '087890123456',
-            'username'       => 'dimasprasetya',
-            'password'       => Hash::make('password123'),
-            'skor_reputasi'  => 100,
-            'status_aktif'   => 1,
-        ]);
+                $transaksi[] = [
+                    // Format unik: TRX-250101-00001
+                    'kode_karcis' => 'TRX-' . $startDate->format('ymd') . '-' . sprintf('\%06d', $globalCounter),
+                    'id_tempat_parkir' => $tenantId,
+                    'id_kendaraan' => $kendaraanIds[array_rand($kendaraanIds)],
+                    'id_tarif' => $tarifId,
+                    'id_booking' => null,
+                    'id_langganan' => null,
+                    'id_petugas_masuk' => null, // Self Check-In
+                    'id_petugas_keluar' => 4, // ID Petugas1
+                    'waktu_masuk' => $jamMasuk,
+                    'waktu_keluar' => $jamKeluar,
+                    'biaya_dasar' => 3000.00,
+                    'denda_overstay' => 0,
+                    'denda_karcis_hilang' => 0,
+                    'identitas_pengambil' => null,
+                    'metode_pembayaran' => 'Tunai',
+                    'status_pembayaran' => 'Sudah Bayar',
+                    'status' => 'keluar',
+                ];
+                $globalCounter++;
+            }
+            $startDate->addDay();
+        }
 
-        Kendaraan::create([
-            'plat_nomor'      => 'F3456UIO',
-            'jenis_kendaraan' => 'Mobil',
-            'warna'           => 'Silver',
-            'id_pengendara'   => $pengendara3->id_pengendara,
-            'id_user_input'   => null,
-        ]);
-
-        Kendaraan::create([
-            'plat_nomor'      => 'F7890PAS',
-            'jenis_kendaraan' => 'Motor',
-            'warna'           => 'Kuning',
-            'id_pengendara'   => $pengendara3->id_pengendara,
-            'id_user_input'   => null,
-        ]);
+        // Insert menggunakan chunk agar memori aman
+        $chunks = array_chunk($transaksi, 1000);
+        foreach ($chunks as$chunk) {
+            DB::table('transaksi')->insert($chunk);
+        }
     }
 }
