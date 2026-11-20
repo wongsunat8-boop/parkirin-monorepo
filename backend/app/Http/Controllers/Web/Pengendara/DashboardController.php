@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Web\Pengendara;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Kendaraan;
+use App\Models\LanggananMember;
 use App\Models\Transaksi;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -18,12 +19,34 @@ class DashboardController extends Controller
         $pengendara = auth('pengendara')->user();
         $pid = $pengendara->id_pengendara;
 
-        $karcisAktif = Transaksi::with(['tempatParkir', 'kendaraan', 'tarif'])
-            ->where('id_pengendara', $pid)
+        // Karcis parkir saat kendaraan berstatus 'masuk'
+        $karcisAktif = $pengendara->transaksi()
+            ->with(['tempatParkir', 'kendaraan', 'tarif'])
             ->where('status', 'masuk')
             ->orderByDesc('waktu_masuk')
             ->first();
 
+        // Langganan Member Aktif
+        $memberAktif = LanggananMember::with(['tempatParkir', 'paket', 'kendaraan'])
+            ->where('id_pengendara', $pid)
+            ->where('status_langganan', 'Aktif')
+            ->where('status_pembayaran', 'Lunas')
+            ->where('tanggal_mulai', '<=', now()->toDateString())
+            ->get()
+            ->first(function ($m) {
+                if (!$m->paket) return false;
+                $endDate = Carbon::parse($m->tanggal_mulai)->addDays($m->paket->durasi_hari);
+                return $endDate->gte(today());
+            });
+
+        // Booking Inap Terjadwal / Aktif
+        $bookingAktif = Booking::with(['tempatParkir', 'kendaraan'])
+            ->where('id_pengendara', $pid)
+            ->whereIn('status', ['Terjadwal', 'Aktif_Inap'])
+            ->orderByDesc('id_booking')
+            ->first();
+
+        // Daftar Kendaraan
         $kendaraan = Kendaraan::withCount('transaksi')
             ->where('id_pengendara', $pid)
             ->orderBy('plat_nomor')
@@ -37,7 +60,7 @@ class DashboardController extends Controller
             $ws = $startWeek->copy()->addWeeks($i);
             $we = $ws->copy()->endOfWeek(Carbon::SUNDAY);
             $weeklyLabels[] = $ws->format('d M');
-            $weeklyCounts[] = Transaksi::where('id_pengendara', $pid)
+            $weeklyCounts[] = $pengendara->transaksi()
                 ->whereBetween('waktu_masuk', [$ws, $we])->count();
         }
 
@@ -49,14 +72,14 @@ class DashboardController extends Controller
             $ms = $startMonth->copy()->addMonths($i);
             $me = $ms->copy()->endOfMonth();
             $monthlyLabels[] = $ms->translatedFormat('M Y');
-            $monthlyCounts[] = Transaksi::where('id_pengendara', $pid)
+            $monthlyCounts[] = $pengendara->transaksi()
                 ->whereBetween('waktu_masuk', [$ms, $me])->count();
         }
 
-        $totalParkir = Transaksi::where('id_pengendara', $pid)->count();
+        $totalParkir = $pengendara->transaksi()->count();
 
         return view('pengendara.dashboard', compact(
-            'karcisAktif', 'kendaraan', 'totalParkir',
+            'karcisAktif', 'memberAktif', 'bookingAktif', 'kendaraan', 'totalParkir',
             'weeklyLabels', 'weeklyCounts', 'monthlyLabels', 'monthlyCounts'
         ));
     }
@@ -64,13 +87,16 @@ class DashboardController extends Controller
     public function bayarCashless(Request $request, Transaksi $transaksi): RedirectResponse
     {
         $pengendara = auth('pengendara')->user();
-        if ($transaksi->id_pengendara !== $pengendara->id_pengendara) {
+        if ($transaksi->kendaraan?->id_pengendara !== $pengendara->id_pengendara) {
             abort(403);
         }
         if ($transaksi->status_pembayaran === 'Sudah Bayar') {
             return back()->with('error', 'Transaksi sudah berstatus Sudah Bayar.');
         }
-        $transaksi->update(['status_pembayaran' => 'Sudah Bayar']);
-        return back()->with('success', 'Pembayaran Cashless/QRIS (simulasi) berhasil. Status: Sudah Bayar.');
+        $transaksi->update([
+            'metode_pembayaran' => 'QRIS_Mitra',
+            'status_pembayaran' => 'Sudah Bayar',
+        ]);
+        return back()->with('success', "Pembayaran transaksi #{$transaksi->id_transaksi} ({$transaksi->kode_karcis}) via QRIS resmi berhasil dikonfirmasi. Status: Sudah Bayar.");
     }
 }

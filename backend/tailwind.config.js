@@ -8,17 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#0D63A5',
-          dark: '#0A4F84',
-          light: '#1A7DC8',
-        },
+        primary: '#0D63A5',
+        'primary-dark': '#083D68',
         secondary: '#F9F9F9',
-        accent: {
-          DEFAULT: '#FFD717',
-          dark: '#E6C200',
-        },
+        slatebody: '#494A5E',
+        accent: '#FFD717',
         dark: '#212121',
+        borderline: '#E5E7EB',
         success: {
           DEFAULT: '#16A34A',
           bg: '#DCFCE7',

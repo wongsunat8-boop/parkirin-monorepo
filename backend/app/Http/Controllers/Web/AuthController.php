@@ -13,11 +13,15 @@ use Illuminate\Validation\Rules\Password;
 class AuthController extends Controller
 {
     /**
-     * Show the login page.
+     * Show the login page with anti-caching headers so CSRF tokens are always fresh.
      */
     public function showLogin()
     {
-        return view('auth.login');
+        return response()
+            ->view('auth.login')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
     }
 
     /**
@@ -69,10 +73,10 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return match ($user->role) {
-            'super_admin' => redirect()->intended('/super-admin'),
-            'owner'       => redirect()->intended('/owner'),
-            'admin'       => redirect()->intended('/admin'),
-            'petugas'     => redirect()->intended('/petugas'),
+            'super_admin' => redirect()->route('super-admin.dashboard'),
+            'owner'       => redirect()->route('owner.dashboard'),
+            'admin'       => redirect()->route('admin.dashboard'),
+            'petugas'     => redirect()->route('petugas.dashboard'),
             default       => redirect('/'),
         };
     }
@@ -111,15 +115,19 @@ class AuthController extends Controller
             return redirect()->route('auth.google.onboarding');
         }
 
-        return redirect()->intended('/pengendara');
+        return redirect()->route('pengendara.dashboard');
     }
 
     /**
-     * Show the registration page.
+     * Show the registration page with anti-caching headers.
      */
     public function showRegister()
     {
-        return view('auth.register');
+        return response()
+            ->view('auth.register')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
     }
 
     /**

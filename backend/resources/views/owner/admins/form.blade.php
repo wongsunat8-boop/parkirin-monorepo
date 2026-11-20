@@ -3,7 +3,6 @@
 @section('sidebar')
     <a href="{{ route('owner.dashboard') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">Dashboard</a>
     <a href="{{ route('owner.admins.index') }}" class="block px-3 py-2 rounded-lg bg-primary text-white">Kelola Admin</a>
-    <a href="{{ route('owner.pengajuan-banned.index') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">Pengajuan Banned</a>
     <a href="{{ route('owner.transaksi.index') }}" class="block px-3 py-2 rounded-lg hover:bg-gray-100">Transaksi Parkir</a>
 @endsection
 @section('staff-content')

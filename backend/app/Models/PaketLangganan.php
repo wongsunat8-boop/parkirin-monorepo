@@ -17,4 +17,7 @@ class PaketLangganan extends Model
         'id_tempat_parkir', 'nama_paket', 'jenis_kendaraan', 
         'durasi_hari', 'batas_masuk_harian', 'harga_paket', 'status_aktif'
     ];
+
+    public function tempatParkir() { return $this->belongsTo(TempatParkir::class, 'id_tempat_parkir'); }
+    public function langgananMember() { return $this->hasMany(LanggananMember::class, 'id_paket'); }
 }

@@ -124,6 +124,108 @@
 </head>
 <body class="min-h-screen flex flex-col bg-secondary text-dark antialiased">
     @yield('content')
+
+    {{-- Akses Cepat Karcis Aktif di Browser (Floating) --}}
+    @if(!request()->routeIs('petugas.*', 'admin.*', 'super-admin.*', 'superadmin.*', 'owner.*', 'pengendara.*', 'login', 'register', 'auth.*', 'checkin.ticket'))
+        @include('partials.active_tickets_floating')
+    @endif
+
     @stack('scripts')
+
+    {{-- Global Currency (Ribuan) Input Formatter & Double-Submission Prevention --}}
+    <script>
+    (function() {
+        // Format angka dengan pemisah ribuan titik
+        function formatRibuanString(val) {
+            if (val === null || val === undefined || val === '') return '';
+            var str = val.toString().replace(/\D/g, '');
+            if (!str) return '';
+            return str.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function initRibuanInputs() {
+            var inputs = document.querySelectorAll('.input-ribuan');
+            inputs.forEach(function(input) {
+                if (input._ribuanBound) return;
+                input._ribuanBound = true;
+
+                // Format nilai awal bila ada
+                if (input.value) {
+                    input.value = formatRibuanString(input.value);
+                }
+
+                input.addEventListener('input', function() {
+                    var cursorPosition = input.selectionStart || 0;
+                    var originalLength = input.value.length;
+                    var raw = input.value.replace(/\D/g, '');
+                    if (!raw) {
+                        input.value = '';
+                        return;
+                    }
+                    var formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    input.value = formatted;
+
+                    var diff = formatted.length - originalLength;
+                    var newCursor = Math.max(0, cursorPosition + diff);
+                    try {
+                        input.setSelectionRange(newCursor, newCursor);
+                    } catch(e) {}
+                });
+            });
+        }
+
+        // Global Anti Double Submit & Input Ribuan Sanitizer on Submit
+        document.addEventListener('submit', function(e) {
+            var form = e.target;
+            if (!form || form.tagName !== 'FORM') return;
+
+            // Bersihkan tanda titik pada semua input-ribuan sebelum payload dikirim
+            form.querySelectorAll('.input-ribuan').forEach(function(input) {
+                input.value = input.value.replace(/\D/g, '');
+            });
+
+            // Cek validasi form bawaan browser
+            if (form.checkValidity && !form.checkValidity()) {
+                return;
+            }
+
+            // Cegah klik / enter ganda (double submit)
+            if (form.dataset.submitting === 'true') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+
+            form.dataset.submitting = 'true';
+
+            // Kunci tombol submit agar tidak diklik dua kali
+            var submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+            submitButtons.forEach(function(btn) {
+                btn.classList.add('opacity-70', 'pointer-events-none', 'cursor-not-allowed');
+                setTimeout(function() {
+                    btn.disabled = true;
+                }, 30);
+            });
+        }, true);
+
+        // Reset submit lock & format ulang bila user kembali lewat tombol Back (BFCache / pageshow)
+        window.addEventListener('pageshow', function() {
+            document.querySelectorAll('form[data-submitting="true"]').forEach(function(form) {
+                delete form.dataset.submitting;
+                form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function(btn) {
+                    btn.classList.remove('opacity-70', 'pointer-events-none', 'cursor-not-allowed');
+                    btn.disabled = false;
+                });
+            });
+            initRibuanInputs();
+        });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRibuanInputs);
+        } else {
+            initRibuanInputs();
+        }
+    })();
+    </script>
 </body>
 </html>

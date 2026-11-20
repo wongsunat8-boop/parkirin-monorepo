@@ -3,7 +3,7 @@
 @section('sidebar') @include('admin.partials.sidebar') @endsection
 @section('staff-content')
     <h1 class="page-title">Log Aktivitas Parkir</h1>
-    <p class="text-sm text-gray-500 mb-4">Keyset/Cursor Pagination dari tabel <code>log_aktivitas</code> dan <code>transaksi</code> (tenant terisolasi).</p>
+    <p class="text-sm text-slate-500 mb-4">Catatan riwayat aktivitas pengguna sistem dan transaksi petugas di lokasi ini.</p>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <div class="ui-card overflow-hidden">
@@ -14,7 +14,7 @@
                     <tbody>
                     @forelse($logs as $log)
                         <tr>
-                            <td class="whitespace-nowrap text-xs text-gray-600">{{ optional($log->waktu_aktivitas)->format('d/m/Y H:i') }}</td>
+                            <td class="whitespace-nowrap text-xs text-slate-700 font-mono font-medium">{{ $log->waktu_aktivitas ? \Carbon\Carbon::parse($log->waktu_aktivitas)->format('d/m/Y H:i:s') : '-' }}</td>
                             <td><div class="font-medium">{{ $log->user->nama_lengkap ?? '-' }}</div><div class="ui-label">{{ $log->user->role ?? '' }}</div></td>
                             <td>{{ $log->aktivitas }}</td>
                         </tr>

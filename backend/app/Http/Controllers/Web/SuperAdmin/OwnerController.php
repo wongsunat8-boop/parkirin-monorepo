@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Web\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogAktivitas;
 use App\Models\TempatParkir;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -13,6 +15,7 @@ class OwnerController extends Controller
 {
     public function index(Request $request)
     {
+        // Hybrid Pagination: Offset pagination for master table (PART 1.3)
         $owners = User::query()
             ->with('tempatParkir:id_tempat_parkir,nama_tempat')
             ->where('role', 'owner')
@@ -23,7 +26,7 @@ class OwnerController extends Controller
                 });
             })
             ->orderByDesc('id_user')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return view('super_admin.owners.index', compact('owners'));
@@ -45,13 +48,21 @@ class OwnerController extends Controller
             'id_tempat_parkir' => 'required|exists:tempat_parkir,id_tempat_parkir',
             'status_aktif' => 'nullable|boolean',
         ]);
-        User::create([
+
+        $owner = User::create([
             'nama_lengkap' => $data['nama_lengkap'],
             'username' => $data['username'],
             'password' => Hash::make($data['password']),
             'role' => 'owner',
             'id_tempat_parkir' => $data['id_tempat_parkir'],
             'status_aktif' => $request->boolean('status_aktif', true) ? 1 : 0,
+        ]);
+
+        LogAktivitas::create([
+            'id_tempat_parkir' => $owner->id_tempat_parkir,
+            'id_user'          => Auth::id(),
+            'aktivitas'        => "Super Admin: Buat Akun Owner [{$owner->nama_lengkap}] (@{$owner->username})",
+            'waktu_aktivitas'  => now(),
         ]);
 
         return redirect()->route('super-admin.owners.index')->with('success', 'Owner berhasil ditambahkan.');
@@ -74,14 +85,24 @@ class OwnerController extends Controller
             'id_tempat_parkir' => 'required|exists:tempat_parkir,id_tempat_parkir',
             'status_aktif' => 'nullable|boolean',
         ]);
+
         $payload = [
             'nama_lengkap' => $data['nama_lengkap'],
             'username' => $data['username'],
             'id_tempat_parkir' => $data['id_tempat_parkir'],
             'status_aktif' => $request->boolean('status_aktif') ? 1 : 0,
         ];
-        if (!empty($data['password'])) $payload['password'] = Hash::make($data['password']);
+        if (!empty($data['password'])) {
+            $payload['password'] = Hash::make($data['password']);
+        }
         $owner->update($payload);
+
+        LogAktivitas::create([
+            'id_tempat_parkir' => $owner->id_tempat_parkir,
+            'id_user'          => Auth::id(),
+            'aktivitas'        => "Super Admin: Perbarui Akun Owner [{$owner->nama_lengkap}]",
+            'waktu_aktivitas'  => now(),
+        ]);
 
         return redirect()->route('super-admin.owners.index')->with('success', 'Owner berhasil diperbarui.');
     }
@@ -90,6 +111,14 @@ class OwnerController extends Controller
     {
         abort_unless($owner->role === 'owner', 404);
         $owner->update(['status_aktif' => $owner->status_aktif ? 0 : 1]);
+
+        LogAktivitas::create([
+            'id_tempat_parkir' => $owner->id_tempat_parkir,
+            'id_user'          => Auth::id(),
+            'aktivitas'        => "Super Admin: Ubah Status Owner [{$owner->nama_lengkap}] menjadi " . ($owner->status_aktif ? 'Aktif' : 'Nonaktif'),
+            'waktu_aktivitas'  => now(),
+        ]);
+
         return back()->with('success', 'Status owner diperbarui.');
     }
 }

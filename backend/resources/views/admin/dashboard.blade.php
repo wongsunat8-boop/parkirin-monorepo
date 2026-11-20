@@ -1,7 +1,7 @@
 @extends('layouts.staff')
 @section('title', 'Dashboard Admin')
-@section('page-title', 'Overview Admin')
-@section('page-desc', ($tenant->nama_tempat ?? 'Tenant').' — ringkasan operasional harian, manajemen kuota kapasitas, tarif, dan log petugas.')
+@section('page-title', 'Ringkasan Admin')
+@section('page-desc', ($tenant->nama_tempat ?? 'Lokasi Parkir').' — ringkasan operasional harian, kapasitas tempat parkir, tarif, dan aktivitas petugas.')
 
 @section('staff-content')
 @php
@@ -9,7 +9,31 @@
     $ter = (int)($tenant->terisi ?? 0);
     $sisa = max(0, $kap - $ter);
     $pct = $kap > 0 ? round(($ter / $kap) * 100) : 0;
+    $unv = (int)($unverifiedCount ?? 0);
 @endphp
+
+{{-- ═══════════════════════════════════════════
+    PEMBERITAHUAN BUKTI BAYAR BELUM DICEK
+═══════════════════════════════════════════ --}}
+@if($unv > 0)
+<div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <div>
+            <div class="font-heading font-extrabold text-sm text-amber-950 flex items-center gap-2">
+                <span>Pemberitahuan: Ada {{ $unv }} Pembayaran QRIS yang Perlu Dicek</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-200 text-amber-900">{{ $unv }} Belum Dicek</span>
+            </div>
+            <p class="text-xs text-amber-800 mt-0.5">Segera periksa bukti transfer yang diunggah dengan uang masuk di mutasi QRIS/bank.</p>
+        </div>
+    </div>
+    <a href="{{ route('admin.verifikasi.index') }}" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0">
+        Buka Verifikasi &rarr;
+    </a>
+</div>
+@endif
 
 {{-- ═══════════════════════════════════════════
     TOP KPI BENTO GRID (4 Cards)
@@ -46,50 +70,50 @@
             </span>
         </div>
         <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Kapasitas Okupansi</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tempat Parkir Terisi</div>
             <div class="text-3xl font-heading font-extrabold text-[#212121] tracking-tight">
                 {{ $ter }} <span class="text-base font-normal text-slate-400">/ {{ $kap }}</span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">{{ $sisa }} slot sisa tersedia</p>
+            <p class="text-xs text-slate-500 mt-1">{{ $sisa }} tempat masih kosong</p>
         </div>
     </div>
 
-    {{-- Card 3: Skema Tarif Aktif --}}
+    {{-- Card 3: Skema Tarif & Paket --}}
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
         <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shadow-2xs">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center shadow-2xs">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
             </div>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/60">
-                Tarif
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">
+                Layanan
             </span>
         </div>
         <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tarif Aktif</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tarif & Paket</div>
             <div class="text-3xl font-heading font-extrabold text-[#212121] tracking-tight">
-                {{ number_format($stats['tarif']) }}
+                {{ number_format($stats['tarif']) }} <span class="text-base font-normal text-slate-400">/ {{ number_format($stats['paket']) }} paket</span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Skema tarif operasional berjalan</p>
+            <p class="text-xs text-slate-500 mt-1">Skema tarif & paket langganan</p>
         </div>
     </div>
 
-    {{-- Card 4: Petugas Aktif --}}
+    {{-- Card 4: Verifikasi Bukti Bayar --}}
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
         <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            <div class="w-10 h-10 rounded-xl {{ $unv > 0 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600' }} flex items-center justify-center shadow-2xs">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                Siap Bertugas
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $unv > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200/60' : 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' }}">
+                <span class="w-1.5 h-1.5 rounded-full {{ $unv > 0 ? 'bg-amber-500 animate-ping' : 'bg-emerald-500' }}"></span>
+                {{ $unv > 0 ? 'Perlu Dicek' : 'Sudah Beres' }}
             </span>
         </div>
         <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Petugas Lapangan</div>
-            <div class="text-3xl font-heading font-extrabold text-emerald-600 tracking-tight">
-                {{ number_format($stats['petugas']) }}
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Cek Pembayaran Online</div>
+            <div class="text-3xl font-heading font-extrabold {{ $unv > 0 ? 'text-amber-600' : 'text-emerald-600' }} tracking-tight">
+                {{ number_format($unv) }}
             </div>
-            <p class="text-xs text-slate-500 mt-1">Akun operator gerbang aktif</p>
+            <p class="text-xs text-slate-500 mt-1">{{ $unv > 0 ? 'Ada bukti bayar yang belum dicek' : 'Semua pembayaran sudah dicek' }}</p>
         </div>
     </div>
 </div>
@@ -122,7 +146,7 @@
         </div>
 
         <div class="pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-            <span>Sinkronisasi data otomatis dengan database tenant</span>
+            <span>Data diperbarui otomatis dari sistem gerbang</span>
             <span class="font-semibold text-primary">Live Data</span>
         </div>
     </div>
@@ -132,8 +156,8 @@
         <div>
             <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
                 <div>
-                    <h3 class="font-heading font-extrabold text-base text-[#212121]">Okupansi & Layanan</h3>
-                    <p class="text-xs text-slate-500">Kondisi slot dan fasilitas tenant</p>
+                    <h3 class="font-heading font-extrabold text-base text-[#212121]">Keterisian & Layanan</h3>
+                    <p class="text-xs text-slate-500">Kondisi tempat parkir dan status layanan</p>
                 </div>
                 <span class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Status</span>
             </div>
@@ -152,36 +176,42 @@
             {{-- Feature Status Badges --}}
             <div class="space-y-2.5 text-xs pt-2">
                 <div class="flex items-center justify-between py-1 border-b border-slate-100">
-                    <span class="text-slate-600">Layanan Booking Online</span>
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ ($tenant->sediakan_booking ?? 0) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200/60' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ ($tenant->sediakan_booking ?? 0) ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
-                        {{ ($tenant->sediakan_booking ?? 0) ? 'Aktif' : 'Nonaktif' }}
+                    <span class="text-slate-600">Layanan Booking Inap</span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ ($tenant->sediakan_booking_inap ?? 0) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200/60' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ ($tenant->sediakan_booking_inap ?? 0) ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                        {{ ($tenant->sediakan_booking_inap ?? 0) ? 'Aktif' : 'Nonaktif' }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between py-1 border-b border-slate-100">
+                    <span class="text-slate-600">Layanan Paket Member</span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ ($tenant->sediakan_member ?? 0) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-slate-100 text-slate-600 border border-slate-200/60' }}">
+                        <span class="w-1.5 h-1.5 rounded-full {{ ($tenant->sediakan_member ?? 0) ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                        {{ ($tenant->sediakan_member ?? 0) ? 'Aktif' : 'Nonaktif' }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between py-1">
                     <span class="text-slate-600">Status Operasional Lahan</span>
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ ($tenant->status_aktif ?? 0) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-rose-50 text-rose-700 border border-rose-200/60' }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ ($tenant->status_aktif ?? 0) ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
                         {{ ($tenant->status_aktif ?? 0) ? 'Buka' : 'Tutup' }}
                     </span>
                 </div>
-                <div class="flex items-center justify-between py-1">
-                    <span class="text-slate-600">Kendaraan Langganan (Offline)</span>
-                    <span class="font-extrabold text-[#212121]">{{ number_format($stats['kendaraan']) }} unit</span>
-                </div>
             </div>
         </div>
 
         {{-- Direct Shortcut Grid --}}
         <div class="grid grid-cols-2 gap-2 pt-4 border-t border-slate-100 mt-2">
-            <a href="{{ route('admin.tarif.index') }}" class="ui-btn ui-btn-primary text-xs">
+            <a href="{{ route('admin.verifikasi.index') }}" class="ui-btn ui-btn-primary text-xs">
+                Verifikasi Bayar
+            </a>
+            <a href="{{ route('admin.paket-langganan.index') }}" class="ui-btn ui-btn-secondary text-xs">
+                Paket Member
+            </a>
+            <a href="{{ route('admin.tarif.index') }}" class="ui-btn ui-btn-secondary text-xs">
                 Kelola Tarif
             </a>
             <a href="{{ route('admin.kapasitas.index') }}" class="ui-btn ui-btn-secondary text-xs">
                 Kapasitas
-            </a>
-            <a href="{{ route('admin.log-aktivitas.index') }}" class="ui-btn ui-btn-secondary col-span-2 text-xs">
-                Log Aktivitas Tenant
             </a>
         </div>
     </div>
@@ -190,31 +220,44 @@
 {{-- ═══════════════════════════════════════════
     BOTTOM BENTO GRID: Operational Management Hub
 ═══════════════════════════════════════════ --}}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <a href="{{ route('admin.verifikasi.index') }}" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:shadow-md hover:border-primary/40 transition flex items-center justify-between group">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <div class="font-bold text-sm text-[#212121]">Verifikasi Bayar</div>
+                <div class="text-xs text-slate-400">Periksa bukti transfer QRIS</div>
+            </div>
+        </div>
+        <span class="text-slate-300 group-hover:text-amber-600 transition font-bold text-base">&rarr;</span>
+    </a>
+
+    <a href="{{ route('admin.paket-langganan.index') }}" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:shadow-md hover:border-primary/40 transition flex items-center justify-between group">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </div>
+            <div>
+                <div class="font-bold text-sm text-[#212121]">Paket Langganan</div>
+                <div class="text-xs text-slate-400">Batas masuk & tarif member</div>
+            </div>
+        </div>
+        <span class="text-slate-300 group-hover:text-indigo-600 transition font-bold text-base">&rarr;</span>
+    </a>
+
     <a href="{{ route('admin.petugas.index') }}" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:shadow-md hover:border-primary/40 transition flex items-center justify-between group">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             </div>
             <div>
-                <div class="font-bold text-sm text-[#212121]">Kelola Petugas Gerbang</div>
+                <div class="font-bold text-sm text-[#212121]">Petugas Gerbang</div>
                 <div class="text-xs text-slate-400">Atur akun shift operasional</div>
             </div>
         </div>
         <span class="text-slate-300 group-hover:text-primary transition font-bold text-base">&rarr;</span>
-    </a>
-
-    <a href="{{ route('admin.kendaraan.index') }}" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:shadow-md hover:border-primary/40 transition flex items-center justify-between group">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
-            </div>
-            <div>
-                <div class="font-bold text-sm text-[#212121]">Master Kendaraan Offline</div>
-                <div class="text-xs text-slate-400">Pendaftaran & pengajuan banned</div>
-            </div>
-        </div>
-        <span class="text-slate-300 group-hover:text-amber-600 transition font-bold text-base">&rarr;</span>
     </a>
 
     <a href="{{ route('admin.pengendara.index') }}" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:shadow-md hover:border-primary/40 transition flex items-center justify-between group">

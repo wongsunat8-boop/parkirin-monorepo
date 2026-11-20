@@ -25,7 +25,7 @@ class AdminController extends Controller
                     ->orWhere('username', 'like', '%'.$request->q.'%'));
             })
             ->orderByDesc('id_user')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return view('owner.admins.index', compact('admins'));

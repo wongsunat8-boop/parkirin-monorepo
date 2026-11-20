@@ -23,7 +23,7 @@ class LogAktivitasController extends Controller
 
         $transaksis = Transaksi::with([
                 'kendaraan:id_kendaraan,plat_nomor,jenis_kendaraan',
-                'pengendara:id_pengendara,nama_lengkap',
+                'pengendara',
                 'petugas:id_user,nama_lengkap',
             ])
             ->where('id_tempat_parkir', $tenantId)

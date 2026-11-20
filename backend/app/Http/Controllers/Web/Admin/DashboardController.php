@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Kendaraan;
+use App\Models\LanggananMember;
+use App\Models\PaketLangganan;
 use App\Models\Tarif;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -17,13 +20,24 @@ class DashboardController extends Controller
     public function index()
     {
         $tenantId = Auth::guard('web')->user()->id_tempat_parkir;
-        $tenant = Auth::guard('web')->user()->tempatParkir()->first(['id_tempat_parkir','nama_tempat','kapasitas','terisi','sediakan_booking','status_aktif']);
+        $tenant = Auth::guard('web')->user()->tempatParkir;
+
+        $unverifiedCount = LanggananMember::where('id_tempat_parkir', $tenantId)
+            ->whereNull('id_user_verifikasi')
+            ->whereNotNull('bukti_bayar')
+            ->count() +
+            Booking::where('id_tempat_parkir', $tenantId)
+            ->whereNull('id_user_verifikasi')
+            ->whereNotNull('bukti_bayar')
+            ->count();
 
         $stats = [
             'aktif' => Transaksi::where('id_tempat_parkir', $tenantId)->where('status','masuk')->whereNull('waktu_keluar')->count(),
             'tarif' => Tarif::where('id_tempat_parkir', $tenantId)->where('status_aktif', 1)->count(),
+            'paket' => PaketLangganan::where('id_tempat_parkir', $tenantId)->where('status_aktif', 1)->count(),
             'petugas' => User::where('id_tempat_parkir', $tenantId)->where('role','petugas')->where('status_aktif',1)->count(),
-            'kendaraan' => Kendaraan::whereNotNull('id_user_input')->whereHas('userInput', fn($q)=>$q->where('id_tempat_parkir',$tenantId))->count(),
+            'kendaraan' => Kendaraan::whereHas('transaksi', fn($q) => $q->where('id_tempat_parkir', $tenantId))->distinct()->count('id_kendaraan'),
+            'unverified' => $unverifiedCount,
         ];
 
         $start = now()->subDays(6)->startOfDay();
@@ -40,10 +54,10 @@ class DashboardController extends Controller
             'keluar' => $keys->map(fn($k) => (int) ($keluar[$k] ?? 0))->values(),
         ];
 
-        $kapasitas = (int) ($tenant->kapasitas ?? 0);
-        $terisi = (int) ($tenant->terisi ?? 0);
+        $kapasitas = (int) ($tenant?->kapasitas ?? 0);
+        $terisi = (int) ($stats['aktif'] ?? 0);
         $chart['occupancy'] = ['terisi' => $terisi, 'sisa' => max(0, $kapasitas - $terisi), 'kapasitas' => $kapasitas];
 
-        return view('admin.dashboard', compact('tenant','stats','chart'));
+        return view('admin.dashboard', compact('tenant','stats','chart','unverifiedCount'));
     }
 }

@@ -17,5 +17,26 @@ class LogAktivitas extends Model
         'id_tempat_parkir', 'id_user', 'aktivitas', 'waktu_aktivitas'
     ];
 
-    public function user() { return $this->belongsTo(User::class, 'id_user'); }
+    protected $casts = [
+        'waktu_aktivitas' => 'datetime',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (LogAktivitas $log) {
+            if (empty($log->waktu_aktivitas)) {
+                $log->waktu_aktivitas = now();
+            }
+        });
+    }
+
+    public function user() 
+    { 
+        return $this->belongsTo(User::class, 'id_user'); 
+    }
+
+    public function tempatParkir() 
+    { 
+        return $this->belongsTo(TempatParkir::class, 'id_tempat_parkir'); 
+    }
 }

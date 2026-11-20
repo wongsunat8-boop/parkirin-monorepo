@@ -1,7 +1,7 @@
 @extends('layouts.staff')
 @section('title', 'Dashboard Super Admin')
-@section('page-title', 'Overview Super Admin')
-@section('page-desc', 'Monitoring ekosistem platform: status seluruh tenant, akun owner, dan kesehatan multi-tenant.')
+@section('page-title', 'Ringkasan Super Admin')
+@section('page-desc', 'Pantau seluruh lokasi lahan parkir, akun pemilik, dan kelancaran sistem.')
 
 @section('staff-content')
 @php
@@ -13,7 +13,7 @@
     TOP KPI BENTO GRID (4 Cards)
 ═══════════════════════════════════════════ --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
-    {{-- Card 1: Total Tenant --}}
+    {{-- Card 1: Total Lokasi Parkir --}}
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center shadow-2xs">
@@ -24,7 +24,7 @@
             </span>
         </div>
         <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Tenant</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Lokasi Parkir</div>
             <div class="text-3xl font-heading font-extrabold text-[#212121] tracking-tight">
                 {{ number_format($stats['total_tenant']) }}
             </div>
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    {{-- Card 2: Tenant Aktif --}}
+    {{-- Card 2: Lokasi Parkir Aktif --}}
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition">
         <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
@@ -44,7 +44,7 @@
             </span>
         </div>
         <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tenant Aktif</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Lokasi Parkir Aktif</div>
             <div class="text-3xl font-heading font-extrabold text-emerald-600 tracking-tight">
                 {{ number_format($stats['tenant_aktif']) }}
             </div>
@@ -63,11 +63,11 @@
             </span>
         </div>
         <div>
-            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Owner</div>
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Pemilik (Owner)</div>
             <div class="text-3xl font-heading font-extrabold text-[#212121] tracking-tight">
                 {{ number_format($stats['total_owner']) }}
             </div>
-            <p class="text-xs text-slate-500 mt-1">Akun pengelola tenant terdaftar</p>
+            <p class="text-xs text-slate-500 mt-1">Akun pemilik lahan terdaftar</p>
         </div>
     </div>
 

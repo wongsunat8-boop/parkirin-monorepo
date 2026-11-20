@@ -1,21 +1,24 @@
-# Laravel & Web Heavy Directories
-backend/vendor/
-backend/node_modules/
-backend/storage/
-backend/bootstrap/cache/
-backend/public/build/
-backend/package-lock.json
-backend/composer.lock   
+# === CREDENTIALS & SECRETS (STRICTLY FORBIDDEN) ===
+.env
+.env.*
+*.pem
+*.key
 
-# Flutter & Mobile Heavy Directories
-mobile/build/
-mobile/.dart_tool/
-mobile/.idea/
-mobile/android/.gradle/
-mobile/ios/Pods/
-mobile/pubspec.lock
+# === LARAVEL HEAVY DIRECTORIES ===
+vendor/
+node_modules/
+public/storage/
+storage/framework/
+storage/logs/
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+package-lock.json
+composer.lock
 
-# System & Git
+# === SYSTEM & GIT ===
 .git/
+.DS_Store
+.idea/
+.vscode/
 *.log
 *.sql

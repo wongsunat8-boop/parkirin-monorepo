@@ -21,27 +21,30 @@
     $navItems = match($role) {
         'super_admin' => [
             ['label'=>'Dashboard', 'route'=>'super-admin.dashboard', 'active'=>'super-admin.dashboard', 'icon'=>'home'],
-            ['label'=>'Tenant', 'route'=>'super-admin.tenants.index', 'active'=>'super-admin.tenants.*', 'icon'=>'building'],
+            ['label'=>'Lokasi Parkir', 'route'=>'super-admin.tenants.index', 'active'=>'super-admin.tenants.*', 'icon'=>'building'],
             ['label'=>'Owner', 'route'=>'super-admin.owners.index', 'active'=>'super-admin.owners.*', 'icon'=>'users'],
             ['label'=>'Log', 'route'=>'super-admin.log-aktivitas.index', 'active'=>'super-admin.log-aktivitas.*', 'icon'=>'log'],
         ],
         'owner' => [
             ['label'=>'Dashboard', 'route'=>'owner.dashboard', 'active'=>'owner.dashboard', 'icon'=>'home'],
             ['label'=>'Admin', 'route'=>'owner.admins.index', 'active'=>'owner.admins.*', 'icon'=>'users'],
-            ['label'=>'Banned', 'route'=>'owner.pengajuan-banned.index', 'active'=>'owner.pengajuan-banned.*', 'icon'=>'shield'],
             ['label'=>'Transaksi', 'route'=>'owner.transaksi.index', 'active'=>'owner.transaksi.*', 'icon'=>'receipt'],
+            ['label'=>'Cek Setoran Kasir', 'route'=>'owner.audit-setoran.index', 'active'=>'owner.audit-setoran.*', 'icon'=>'receipt'],
         ],
         'admin' => [
             ['label'=>'Dashboard', 'route'=>'admin.dashboard', 'active'=>'admin.dashboard', 'icon'=>'home'],
+            ['label'=>'Verifikasi Bayar', 'route'=>'admin.verifikasi.index', 'active'=>'admin.verifikasi.*', 'icon'=>'shield'],
+            ['label'=>'Paket Member', 'route'=>'admin.paket-langganan.index', 'active'=>'admin.paket-langganan.*', 'icon'=>'tag'],
             ['label'=>'Tarif', 'route'=>'admin.tarif.index', 'active'=>'admin.tarif.*', 'icon'=>'tag'],
             ['label'=>'Kapasitas', 'route'=>'admin.kapasitas.index', 'active'=>'admin.kapasitas.*', 'icon'=>'gauge'],
+            ['label'=>'QR Gerbang', 'route'=>'admin.qr-gate.index', 'active'=>'admin.qr-gate.*', 'icon'=>'qr'],
             ['label'=>'Petugas', 'route'=>'admin.petugas.index', 'active'=>'admin.petugas.*', 'icon'=>'users'],
-            ['label'=>'Kendaraan', 'route'=>'admin.kendaraan.index', 'active'=>'admin.kendaraan.*', 'icon'=>'car'],
             ['label'=>'Pengendara', 'route'=>'admin.pengendara.index', 'active'=>'admin.pengendara.*', 'icon'=>'id'],
             ['label'=>'Log', 'route'=>'admin.log-aktivitas.index', 'active'=>'admin.log-aktivitas.*', 'icon'=>'log'],
         ],
         'petugas' => [
             ['label'=>'Dashboard', 'route'=>'petugas.dashboard', 'active'=>'petugas.dashboard', 'icon'=>'home'],
+            ['label'=>'Scan Keluar', 'route'=>'petugas.scanner-keluar', 'active'=>'petugas.scanner-keluar*', 'icon'=>'qr'],
         ],
         default => [],
     };
@@ -53,6 +56,7 @@
             'shield' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/>',
             'receipt' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z"/>',
             'tag' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>',
+            'qr' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3v3h-3v-3zM13.5 19.5h3v.75h-3v-.75zM19.5 13.5h.75v3h-.75v-3zM19.5 19.5h.75v.75h-.75v-.75z"/>',
             'gauge' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>',
             'car' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>',
             'id' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"/>',

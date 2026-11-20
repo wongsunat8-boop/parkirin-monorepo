@@ -7,15 +7,16 @@
     $homeRoute = route('pengendara.dashboard');
     $navItems = [
         ['label'=>'Dashboard', 'route'=>'pengendara.dashboard', 'active'=>'pengendara.dashboard', 'icon'=>'home'],
+        ['label'=>'Scan Gerbang', 'route'=>'checkin.scanner', 'active'=>'checkin.scanner', 'icon'=>'scan'],
         ['label'=>'Riwayat', 'route'=>'pengendara.riwayat.index', 'active'=>'pengendara.riwayat.*', 'icon'=>'history'],
         ['label'=>'Katalog', 'route'=>'pengendara.katalog.index', 'active'=>'pengendara.katalog.*', 'icon'=>'search'],
-        ['label'=>'Notifikasi', 'route'=>'pengendara.notifikasi.index', 'active'=>'pengendara.notifikasi.*', 'icon'=>'bell'],
         ['label'=>'Profil', 'route'=>'pengendara.profil.index', 'active'=>'pengendara.profil.*', 'icon'=>'user'],
     ];
-    $claimCount = \App\Models\PengajuanKlaimKendaraan::where('id_pengendara_target', $authUser?->id_pengendara)->where('status_klaim', 'Pending')->count();
+    $claimCount = 0;
     $icon = function($name, $class='w-5 h-5') {
         $paths = [
             'home' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>',
+            'scan' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM6.75 6.75h.008v.008H6.75V6.75zM6.75 16.5h.008v.008H6.75V16.5zM16.5 6.75h.008v.008H16.5V6.75zM13.5 13.5h3.75m0 0v3.75m0-3.75l3.75 3.75M13.5 20.25h6.75"/>',
             'history' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>',
             'search' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>',
             'bell' => '<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>',

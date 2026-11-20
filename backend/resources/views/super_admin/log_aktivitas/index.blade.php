@@ -11,7 +11,7 @@
       <tbody>
       @forelse($logs as $log)
         <tr>
-          <td class="whitespace-nowrap text-gray-600">{{ optional($log->waktu_aktivitas)->format('d/m/Y H:i') }}</td>
+          <td class="whitespace-nowrap text-xs text-slate-700 font-mono font-medium">{{ $log->waktu_aktivitas ? \Carbon\Carbon::parse($log->waktu_aktivitas)->format('d/m/Y H:i:s') : '-' }}</td>
           <td>
             <div class="font-medium">{{ $log->user->nama_lengkap ?? '-' }}</div>
             <div class="text-[11px] text-gray-500">{{ $log->user->role ?? '' }}</div>

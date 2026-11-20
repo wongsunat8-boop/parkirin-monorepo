@@ -19,7 +19,9 @@ class LanggananMember extends Model
         'waktu_unggah_bukti', 'status_pembayaran', 'status_langganan', 'waktu_registrasi'
     ];
 
+    public function tempatParkir() { return $this->belongsTo(TempatParkir::class, 'id_tempat_parkir'); }
     public function paket() { return $this->belongsTo(PaketLangganan::class, 'id_paket'); }
     public function pengendara() { return $this->belongsTo(Pengendara::class, 'id_pengendara'); }
     public function kendaraan() { return $this->belongsTo(Kendaraan::class, 'id_kendaraan'); }
+    public function userVerifikasi() { return $this->belongsTo(User::class, 'id_user_verifikasi'); }
 }

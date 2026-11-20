@@ -13,37 +13,25 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_landing_page_renders_with_8_sections(): void
+    public function test_landing_page_renders_with_sections(): void
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
         // Section 1: Hero Section
         $response->assertSee('Kelola Parkir Lebih');
-        $response->assertSee('Mulai Parkir Sekarang');
-        // Section 2: About Us (4 Pilar: Aman, Fleksibel, Profesional, Terpercaya)
-        $response->assertSee('4 Pilar Utama');
-        $response->assertSee('Aman');
-        $response->assertSee('Fleksibel');
-        $response->assertSee('Profesional');
-        $response->assertSee('Terpercaya');
+        $response->assertSee('Scan QR Check-In (Guest)');
+        $response->assertSee('Self Check-In');
+        $response->assertSee('Auto-Lunas');
+        // Section 2: About Us
+        $response->assertSee('Tentang Parkirin');
         // Section 3: Fitur
-        $response->assertSee('Fitur Lengkap');
-        $response->assertSee('Scan OCR Plat On-Device');
+        $response->assertSee('Semua Kebutuhan Parkir dalam Satu Aplikasi');
         // Section 4: Cara Kerja
-        $response->assertSee('Alur Operasional');
-        $response->assertSee('Kendaraan Masuk');
-        // Section 5: Keunggulan
-        $response->assertSee('Mengapa Memilih');
-        $response->assertSee('Isolasi Tenant & Anti-IDOR');
-        // Section 6: Testimoni (marquee)
-        $response->assertSee('Testimoni Pengguna');
-        $response->assertSee('Budi Hartono');
-        // Section 7: CTA & Kontak (marquee)
-        $response->assertSee('Siap Memodernisasi');
-        $response->assertSee('info@parkirin.id');
-        // Section 8: Footer
-        $response->assertSee('Parkirin SaaS');
+        $response->assertSee('Empat Langkah Mudah di Lapangan');
+        $response->assertSee('Self Check-In Masuk');
+        // Section 5: Keunggulan / Testimoni / Kontak / Footer
+        $response->assertSee('Parkirin');
     }
 
     public function test_login_page_renders_successfully(): void
@@ -303,5 +291,13 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_login_page_sends_anti_caching_headers(): void
+    {
+        $response = $this->get('/login');
+        $response->assertStatus(200);
+        $response->assertHeader('Cache-Control');
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
     }
 }

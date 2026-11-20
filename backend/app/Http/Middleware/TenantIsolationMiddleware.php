@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Pengendara;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -16,7 +17,16 @@ class TenantIsolationMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user('web') ?? $request->user('sanctum-user') ?? $request->user();
+        $user = $request->user('web') ?? $request->user('pengendara') ?? $request->user('sanctum-user') ?? $request->user();
+
+        if (!$user) {
+            abort(401);
+        }
+
+        // Pengendara does not belong to a specific tenant (customer across multiple locations)
+        if ($user instanceof Pengendara) {
+            return $next($request);
+        }
 
         if (!$user instanceof User) {
             abort(401);
@@ -33,7 +43,7 @@ class TenantIsolationMiddleware
         }
 
         // Blokir sesi aktif jika tenant dinonaktifkan (mencegah perubahan data pada tenant nonaktif).
-        $user->loadMissing('tempatParkir:id_tempat_parkir,status_aktif');
+        $user->loadMissing('tempatParkir');
         $tenantAktif = (int) ($user->tempatParkir->status_aktif ?? 0) === 1;
         if (!$tenantAktif) {
             if (Auth::guard('web')->check()) {

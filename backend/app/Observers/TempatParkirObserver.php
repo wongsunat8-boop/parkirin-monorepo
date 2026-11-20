@@ -33,11 +33,11 @@ class TempatParkirObserver
         if (!$user) return;
 
         $changes = [];
-        if ($tp->wasChanged('kapasitas')) {
-            $changes[] = "kapasitas={$tp->kapasitas}";
+        if ($tp->wasChanged('kapasitas') || $tp->wasChanged('kapasitas_reguler')) {
+            $changes[] = "kapasitas={$tp->kapasitas_reguler}";
         }
-        if ($tp->wasChanged('sediakan_booking')) {
-            $label = $tp->sediakan_booking ? 'aktif' : 'nonaktif';
+        if ($tp->wasChanged('sediakan_booking') || $tp->wasChanged('sediakan_booking_inap')) {
+            $label = $tp->sediakan_booking_inap ? 'aktif' : 'nonaktif';
             $changes[] = "booking={$label}";
         }
         if ($tp->wasChanged('status_aktif')) {

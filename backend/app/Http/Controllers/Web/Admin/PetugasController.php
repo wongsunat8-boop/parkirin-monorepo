@@ -20,7 +20,7 @@ class PetugasController extends Controller
             ->when($request->filled('q'), fn($q) => $q->where(fn($qq) => $qq->where('nama_lengkap','like','%'.$request->q.'%')->orWhere('username','like','%'.$request->q.'%')))
             ->withCount(['transaksiDilayani' => fn($q) => $q->where('id_tempat_parkir', $this->tenantId())])
             ->orderByDesc('id_user')
-            ->paginate(15)->withQueryString();
+            ->paginate(10)->withQueryString();
         return view('admin.petugas.index', compact('petugasList'));
     }
 
